@@ -1,5 +1,5 @@
 (function(angular) {
-	var module = angular.module('net.enzey.trailingInput', []);
+	var module = angular.module('net.enzey.autocomplete', []);
 
 	module.directive('nzAutoComplete', function($compile, $parse, $timeout) {
 		return {
