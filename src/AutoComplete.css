@@ -1,0 +1,77 @@
+.inputHint {
+	position: relative;
+	display: inline-block;
+}
+.inputHint > iframe {
+	position: relative;
+	top: 0px;
+	left: 0px;
+    background: transparent;
+    background-color: transparent;
+}
+
+.inputHint iframe {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    background: transparent;
+    background-color: transparent;
+    border: none;
+    margin: 0px;
+}
+
+.inputHint .textEntry {
+    position: absolute;
+    margin: 0px;
+    padding: 2px;
+    border-width: 1px;
+	top: 0px;
+	left: 0px;
+}
+
+.inputHint .textEntry:focus {
+    background: transparent;
+    background-color: transparent;
+}
+
+.inputHint .textEntry:focus  + .scrollerContainer,
+.inputHint .scrollerContainer:hover {
+    display: block;
+}
+
+.inputHint .hintBox {
+    position: relative;
+    margin: 0px;
+    padding: 2px;
+    border-width: 1px;
+    color: #B0B0B0;
+}
+
+.inputHint .hint{
+   margin: 3px;
+   position: relative;
+   display: block;
+   cursor: pointer;
+}
+
+.inputHint .scrollerContainer {
+	position: absolute;
+    display: none;
+	padding: 0;
+	margin: 0;
+}
+
+.inputHint .scroller {
+    display: block;
+	position: relative;
+	border: 1px solid;
+	background: white;
+	z-index: 9000;
+	overflow-y: auto;
+	overflow-x: hidden;
+	max-height: 8em;
+}
+
+.inputHint .selectedHint {
+    background-color: lightblue;
+}
