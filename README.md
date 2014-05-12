@@ -3,6 +3,8 @@ AutoComplete
 
 Native AngularJS &amp; CSS AutoComplete with trailing hint text
 
+Angular Module: net.enzey.autocomplete
+Directive Name: nzAutoComplete
 
 | required | directive params | description |
 | ------------- | ------------- | ------------- |
@@ -11,3 +13,7 @@ Native AngularJS &amp; CSS AutoComplete with trailing hint text
 | false | is-selection-required  | If the input must exactly match a hint text. |
 | true | get-results-fn  | getResultsFn(inputText) - Function that returns the hints to display. |
 | false | position-hints-fn  | positionHintsFn(hintListElem, inputElem) - Function that allows custom positioning of the hint results.  |
+
+```
+<div nz-auto-complete get-results-fn="resultsFunctionOnController" ng-model="modelLocation"></div>
+```
