@@ -16,6 +16,7 @@ Directive Name: nzAutoComplete
 | true | get-results-fn  | getResultsFn(inputText) - Function that returns the hints to display. |
 | false | position-hints-fn  | positionHintsFn(hintListElem, inputElem) - Function that allows custom positioning of the hint results.  |
 
+
 ```
 <div nz-auto-complete get-results-fn="resultsFunctionOnController" ng-model="modelLocation"></div>
 ```
