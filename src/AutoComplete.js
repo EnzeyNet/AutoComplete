@@ -16,8 +16,8 @@
 							});
 				*/
 				var displayHint = false;
-				var getResultsFunc = $parse(attr.getResultsFunc)(scope.$parent);
-				if (!getResultsFunc || !typeof getResultsFunc === 'function') {
+				var getResultsFn = $parse(attr.getResultsFn)(scope.$parent);
+				if (!getResultsFn || !typeof getResultsFn === 'function') {
 					throw 'A function that returns results is required!';
 				}
 				var isSelectionRequired = false;
@@ -71,7 +71,7 @@
 					displayHint = true;
                     scope.hintableIndex = null;
 					var newHintText = scope.actualText;
-					scope.hintables = getResultsFunc(scope.actualText);
+					scope.hintables = getResultsFn(scope.actualText);
 					if (!scope.hintables) {scope.hintables = [];}
 
 					if (scope.hintables.length > 0) {
