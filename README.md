@@ -18,5 +18,5 @@ Directive Name: nzAutoComplete
 
 
 ```
-<div nz-auto-complete get-results-fn="resultsFunctionOnController" ng-model="modelLocation"></div>
+<div nz-auto-complete get-results-fn="_resultsFunctionOnController_" ng-model="modelLocation"></div>
 ```

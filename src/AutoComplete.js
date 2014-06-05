@@ -6,7 +6,14 @@
 			scope: {},
 			restrict: 'AE',
 			link: function (scope, element, attr) {
-				var positionHintsFn;
+				var positionHintsFn = function(hintList, inputElem) {
+					var scroller = hintList.find('.scroller')[0];
+					if (scroller.scrollHeight > scroller.clientHeight) {
+						angular.element(scroller).css('overflow-y', 'scroll');
+					} else {
+						angular.element(scroller).css('overflow-y', '');
+					}
+				};
 				/*
 					positionHintsFn = 
 							$(hintList).position({

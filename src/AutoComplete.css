@@ -67,8 +67,7 @@
 	border: 1px solid;
 	background: white;
 	z-index: 9000;
-	overflow-y: auto;
-	overflow-x: hidden;
+	overflow: hidden;
 	max-height: 8em;
 }
 
