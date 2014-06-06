@@ -13,7 +13,7 @@ Directive Name: nzAutoComplete
 | true | ng-model  | The model value on the scope to set the selected input to.  |
 | false | display-path  | The path within the returned objects from the getResultsFn to get to the hint text of the object. |
 | false | is-selection-required  | If the input must exactly match a hint text. |
-| true | get-results-fn  | getResultsFn(inputText) - Function that returns the hints to display. |
+| true | get-results-fn  | getResultsFn(inputText) - A promise that returns the hints to display. |
 | false | position-hints-fn  | positionHintsFn(hintListElem, inputElem) - Function that allows custom positioning of the hint results.  |
 
 
