@@ -7,7 +7,7 @@
 			restrict: 'AE',
 			link: function (scope, element, attr) {
 				var positionHintsFn = function(hintList, inputElem) {
-					var scroller = hintList.find('.scroller')[0];
+					var scroller = hintList.find('div')[0];
 					if (scroller.scrollHeight > scroller.clientHeight) {
 						angular.element(scroller).css('overflow-y', 'scroll');
 					} else {
@@ -54,16 +54,16 @@
 					if (index === scope.hintableIndex) {return;}
 
 					if (0 <= index && index < scope.hintables.length) {
-						var hints = hintList.find('.hint');
+						var scroller = hintList.find('div')[0];
+						var hints =   angular.element(scroller).children();
 						var newHint = angular.element(hints[index]);
-						var scroller = hintList.find('.scroller')[0];
 
 						if (newHint[0].offsetTop < scroller.scrollTop) {
 							// scrollUp
 							scroller.scrollTop = newHint[0].offsetTop - 1;
-						} else if (newHint[0].offsetTop + newHint.outerHeight() > scroller.scrollTop + scroller.clientHeight) {
+						} else if (newHint[0].offsetTop + newHint[0].clientHeight > scroller.scrollTop + scroller.clientHeight) {
 							// scrollDown
-							scroller.scrollTop = newHint[0].offsetTop + newHint.outerHeight() - scroller.clientHeight + 1;
+							scroller.scrollTop = newHint[0].offsetTop + newHint[0].clientHeight - scroller.clientHeight + 1;
 						}
 
 						scope.hintableIndex = index;
