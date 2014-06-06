@@ -15,12 +15,14 @@
 					}
 				};
 				/*
-					positionHintsFn = 
-							$(hintList).position({
-								my: "left top",
-								at: "left bottom",
-								of: inputElem
-							});
+				positionHintsFn = function(hintList, inputElem) {
+					$(hintList).position({
+						my: "left top",
+						at: "left bottom",
+						of: inputElem,
+						collision: 'flip'
+					});
+				}
 				*/
 				var displayHint = false;
 				var getResultsFn = $parse(attr.getResultsFn)(scope.$parent);
@@ -48,6 +50,32 @@
 				element.append($compile('<iframe></iframe>')(scope));
 				element.append(inputElem);
 
+				var selectRow = function(index, skipApply) {
+					if (index === scope.hintableIndex) {return;}
+
+					if (0 <= index && index < scope.hintables.length) {
+						var hints = hintList.find('.hint');
+						var newHint = angular.element(hints[index]);
+						var scroller = hintList.find('.scroller')[0];
+
+						if (newHint[0].offsetTop < scroller.scrollTop) {
+							// scrollUp
+							scroller.scrollTop = newHint[0].offsetTop - 1;
+						} else if (newHint[0].offsetTop + newHint.outerHeight() > scroller.scrollTop + scroller.clientHeight) {
+							// scrollDown
+							scroller.scrollTop = newHint[0].offsetTop + newHint.outerHeight() - scroller.clientHeight + 1;
+						}
+
+						scope.hintableIndex = index;
+						if (!skipApply) {
+							scope.$apply();
+						}
+						if (displayHint === true) {
+							hintInputElem.val(getHintDisplay());
+						}
+					}
+				};
+
                 scope.select = function(selectedIndex) {
                     scope.hintableIndex = selectedIndex;
 					scope.actualText = getHintDisplay();
@@ -55,14 +83,11 @@
                 };
 
                 scope.hoverOver = function(selectedIndex) {
-                    scope.hintableIndex = selectedIndex;
-					if (displayHint === true) {
-						hintInputElem.val(getHintDisplay());
-					}
+					selectRow(selectedIndex, true);
                 };
 
 				var hintText = angular.isDefined(attr.displayPath) ? 'hint.' + attr.displayPath : 'hint';
-                var hintList = $compile('<div class="scrollerContainer" ng-hide="hintables.length < 2"><iframe></iframe><div class="scroller"><div class="hint" ng-repeat="hint in hintables" ng-click="select($index)" ng-mouseover="hoverOver($index)" ng-class="{selectedHint: $index === hintableIndex}"><div nz-no-bind>{{' + hintText + '}}</div></div></div></div>')(scope);
+                var hintList = $compile('<div class="scrollerContainer" ng-hide="hintables.length < 2"><iframe></iframe><div class="scroller"><div class="hint" ng-repeat="hint in hintables" ng-click="select($index)" ng-mouseover="hoverOver($index)" ng-class="{selectedHint: $index === hintableIndex}"><div>{{' + hintText + '}}</div></div></div></div>')(scope);
                 element.append(hintList);
 
 				scope.actualText = '';
@@ -81,6 +106,7 @@
 					scope.hintables = getResultsFn(scope.actualText);
 					if (!scope.hintables) {scope.hintables = [];}
 
+					hintInputElem.val('');
 					if (scope.hintables.length > 0) {
 						var regex = new RegExp('^' + scope.actualText);
 						var objParser = null;
@@ -94,14 +120,12 @@
 								displayHint = displayHint && regex.test(hintObj);
 							}
 						});
-						scope.hintableIndex = 0;
-						newHintText = getHintDisplay();
+						$timeout(function() {
+							selectRow(0);
+						}, 0, false);
+
 					}
-					if (displayHint === true) {
-						hintInputElem.val(newHintText);
-					} else {
-						hintInputElem.val('');
-					}
+
 					if (positionHintsFn) {
 						$timeout(function() {
 							positionHintsFn(hintList, inputElem);
@@ -131,27 +155,27 @@
 						scope.$apply();
 					} else if (e.keyCode === 40) {
 						// key down
-						if (scope.hintableIndex !== null && hintInputElem.val().length > scope.actualText.length) {
+						if (scope.hintableIndex !== null && scope.hintables.length > 1) {
+							var newIndex;
 							if (scope.hintableIndex === scope.hintables.length - 1) {
-                                scope.hintableIndex = 0;
+								newIndex = 0;
 							} else {
-                                scope.hintableIndex++;
+								newIndex = scope.hintableIndex + 1;
 							}
-							hintInputElem.val(getHintDisplay());
-							scope.$apply();
+							selectRow(newIndex);
 						}
                         e.preventDefault();
                         e.stopPropagation();
 					} else if (e.keyCode === 38) {
 						// key up
-						if (scope.hintableIndex !== null && hintInputElem.val().length > scope.actualText.length) {
+						if (scope.hintableIndex !== null && scope.hintables.length > 1) {
+							var newIndex;
 							if (scope.hintableIndex === 0) {
-								scope.hintableIndex = scope.hintables.length - 1;
+								newIndex = scope.hintables.length - 1;
 							} else {
-								scope.hintableIndex--;
+								newIndex = scope.hintableIndex - 1;
 							}
-							hintInputElem.val(getHintDisplay());
-							scope.$apply();
+							selectRow(newIndex);
 						}
                         e.preventDefault();
                         e.stopPropagation();

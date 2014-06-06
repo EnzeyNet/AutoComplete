@@ -49,6 +49,7 @@
 
 .inputHint .hint{
    margin: 3px;
+   padding: .1em .4em;
    position: relative;
    display: block;
    cursor: pointer;
