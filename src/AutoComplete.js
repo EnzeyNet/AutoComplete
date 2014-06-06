@@ -102,37 +102,40 @@
 				scope.$watch('actualText', function() {
 					displayHint = true;
                     scope.hintableIndex = null;
-					var newHintText = scope.actualText;
-					scope.hintables = getResultsFn(scope.actualText);
-					if (!scope.hintables) {scope.hintables = [];}
-
 					hintInputElem.val('');
-					if (scope.hintables.length > 0) {
-						var regex = new RegExp('^' + scope.actualText);
-						var objParser = null;
-						if (angular.isDefined(attr.displayPath)) {
-							objParser = $parse(attr.displayPath);
-						}
-						scope.hintables.forEach(function(hintObj) {
-							if (objParser) {
-								displayHint = displayHint && regex.test(objParser(hintObj));
-							} else {
-								displayHint = displayHint && regex.test(hintObj);
+					scope.hintables = [];
+
+					getResultsFn(scope.actualText).then(function(hintResults) {
+						scope.hintables = hintResults;
+						if (!scope.hintables) {scope.hintables = [];}
+
+						if (scope.hintables.length > 0) {
+							var regex = new RegExp('^' + scope.actualText);
+							var objParser = null;
+							if (angular.isDefined(attr.displayPath)) {
+								objParser = $parse(attr.displayPath);
 							}
-						});
-						$timeout(function() {
-							selectRow(0);
-						}, 0, false);
+							scope.hintables.forEach(function(hintObj) {
+								if (objParser) {
+									displayHint = displayHint && regex.test(objParser(hintObj));
+								} else {
+									displayHint = displayHint && regex.test(hintObj);
+								}
+							});
+							$timeout(function() {
+								selectRow(0);
+							}, 0, false);
 
-					}
+						}
 
-					if (positionHintsFn) {
-						$timeout(function() {
-							positionHintsFn(hintList, inputElem);
-						}, 1, false);
-					}
+						if (positionHintsFn) {
+							$timeout(function() {
+								positionHintsFn(hintList, inputElem);
+							}, 1, false);
+						}
 
-					setParentModel();
+						setParentModel();
+					});
 				});
 
 				var setParentModel = function() {
