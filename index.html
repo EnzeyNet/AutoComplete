@@ -1,8 +1,53 @@
-<html>
+<html ng-app="net.enzey.examples">
 	<head>
-		<link rel="stylesheet" type="text/css" href="src/AutoComplete.css">
+        <!--script src="https://code.jquery.com/jquery-1.11.0.min.js"></script-->
+        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.0-beta.8/angular.js"></script>
+
+		<script src="dist/AutoComplete.js"></script>
+		<script src="example.js"></script>
+
+		<style>
+			 *, *:before, *:after {
+			  -moz-box-sizing: border-box; -webkit-box-sizing: border-box; box-sizing: border-box;
+			 }
+		</style>
+
+		<link  href="dist/AutoComplete.css" rel="stylesheet" type="text/css"></link>
 	</head>
 	<body>
-		<div>Hello There!</div>
+		<div ng-controller="autoCompeteExample">
+		Angular Watch Count: {{watchCount}}
+			<p>Type 'n' in the input</p>
+			<p>Use up / down arrows to cycle</p>
+			<p>Use enter / right arrow to accept hint value</p>
+			
+			<p>Returns Text</p>
+			<div nz-auto-complete get-results-fn="searchFunction" ng-model="select1"></div>
+			<div style="float: right"> {{select1}}</div>
+			
+			<div style="height: 60px;"></div>
+			
+			<p>Selection Required</p>
+			<p>Returns Text</p>
+			<div nz-auto-complete get-results-fn="searchFunction" ng-model="select2" selection-required="true"></div>
+			<div style="float: right"> {{select2}}</div>
+
+			<div style="height: 60px;"></div>
+
+			<p>Returns Object</p>
+			<div nz-auto-complete get-results-fn="searchFunctionObjs" ng-model="select3" display-path="foo.bar"></div>
+			<div style="float: right"> {{select3}}</div>
+
+			<div style="height: 60px;"></div>
+
+			<p>Selection Required</p>
+			<p>Returns Object</p>
+			<div nz-auto-complete get-results-fn="searchFunctionAnyLoc" ng-model="select4" selection-required="true" display-path="foo.bar"></div>
+			<div style="float: right"> {{select4}}</div>
+
+</BR>
+</BR>
+
+		</div>
 	</body>
 </html>
