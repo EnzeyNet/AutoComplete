@@ -6,6 +6,8 @@
 			scope: {},
 			restrict: 'AE',
 			link: function (scope, element, attr) {
+				element.addClass('inputHint');
+
 				var positionHintsFn = function(hintList, inputElem) {
 					var scroller = hintList.find('div')[0];
 					if (scroller.scrollHeight > scroller.clientHeight) {
@@ -24,17 +26,26 @@
 					});
 				}
 				*/
+
+				var pendingResultsFunctionCall;
+				var silentPeriod = +$parse(attr.silentPeriod)(scope);
+				if (isNaN(silentPeriod)) {silentPeriod = 250;}
+
+				var minimumChars = +$parse(attr.minChar)(scope);
+				if (isNaN(minimumChars)) {minimumChars = 1;}
+
 				var displayHint = false;
 				var getResultsFn = $parse(attr.getResultsFn)(scope.$parent);
 				if (!getResultsFn || !typeof getResultsFn === 'function') {
 					throw 'A function that returns results is required!';
 				}
+
 				var isSelectionRequired = false;
 				if ( (angular.isDefined(attr.selectionRequired) && attr.selectionRequired === 'true') || 
 						angular.isDefined(attr.displayPath) ) {
 					isSelectionRequired = true;
 				}
-				element.addClass('inputHint');
+
 				var hintInputElem = $compile('<input class="hintBox" tabindex="-1"></input>')(scope);
                 var inputElem     = $compile('<input class="textEntry" ng-model="actualText"></input>')(scope);
 
@@ -99,44 +110,37 @@
 						}, 1, false);
 					}
 				});
-				scope.$watch('actualText', function() {
-					displayHint = true;
-                    scope.hintableIndex = null;
-					hintInputElem.val('');
-					scope.hintables = [];
 
-					getResultsFn(scope.actualText).then(function(hintResults) {
-						scope.hintables = hintResults;
-						if (!scope.hintables) {scope.hintables = [];}
+				var displaySuggestions = function(hintResults) {
+					scope.hintables = hintResults;
+					if (!scope.hintables) {scope.hintables = [];}
 
-						if (scope.hintables.length > 0) {
-							var regex = new RegExp('^' + scope.actualText);
-							var objParser = null;
-							if (angular.isDefined(attr.displayPath)) {
-								objParser = $parse(attr.displayPath);
+					if (scope.hintables.length > 0) {
+						var regex = new RegExp('^' + scope.actualText);
+						var objParser = null;
+						if (angular.isDefined(attr.displayPath)) {
+							objParser = $parse(attr.displayPath);
+						}
+						scope.hintables.forEach(function(hintObj) {
+							if (objParser) {
+								displayHint = displayHint && regex.test(objParser(hintObj));
+							} else {
+								displayHint = displayHint && regex.test(hintObj);
 							}
-							scope.hintables.forEach(function(hintObj) {
-								if (objParser) {
-									displayHint = displayHint && regex.test(objParser(hintObj));
-								} else {
-									displayHint = displayHint && regex.test(hintObj);
-								}
-							});
-							$timeout(function() {
-								selectRow(0);
-							}, 0, false);
+						});
+						$timeout(function() {
+							selectRow(0);
+						}, 0, false);
 
-						}
+					}
 
-						if (positionHintsFn) {
-							$timeout(function() {
-								positionHintsFn(hintList, inputElem);
-							}, 1, false);
-						}
+					if (positionHintsFn) {
+						$timeout(function() {
+							positionHintsFn(hintList, inputElem);
+						}, 1, false);
+					}
 
-						setParentModel();
-					});
-				});
+				};
 
 				var setParentModel = function() {
 					if (isSelectionRequired) {
@@ -148,9 +152,31 @@
 							$parse(attr.ngModel).assign(scope.$parent);
 						}
 					} else {
-						$parse(attr.ngModel).assign(scope.$parent, scope.actualText);
+						if (minimumChars <= scope.actualText.length) {
+							$parse(attr.ngModel).assign(scope.$parent, scope.actualText);
+						} else {
+							$parse(attr.ngModel).assign(scope.$parent, "");
+						}
 					}
 				};
+
+				scope.$watch('actualText', function() {
+					displayHint = true;
+					scope.hintableIndex = null;
+					hintInputElem.val('');
+					scope.hintables = [];
+
+					// Stop any pending requests
+					$timeout.cancel(pendingResultsFunctionCall);
+
+					setParentModel();
+					if (minimumChars <= scope.actualText.length) {
+						pendingResultsFunctionCall = $timeout(function() {
+							// ... Display loading indication ...
+							getResultsFn(scope.actualText).then(displaySuggestions);
+						}, silentPeriod, true);
+					}
+				});
 
 				inputElem.bind("keydown", function(e) {
 					if (scope.hintableIndex !== null && (e.keyCode === 13 || e.keyCode === 39)) {
