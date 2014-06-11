@@ -16,6 +16,10 @@
 						angular.element(scroller).css('overflow-y', '');
 					}
 				};
+
+				if (angular.isDefined(attr.positionHintsFn)) {
+					positionHintsFn = $parse(attr.positionHintsFn)(scope.$parent);
+				}
 				/*
 				positionHintsFn = function(hintList, inputElem) {
 					$(hintList).position({
@@ -28,10 +32,10 @@
 				*/
 
 				var pendingResultsFunctionCall;
-				var silentPeriod = +$parse(attr.silentPeriod)(scope);
+				var silentPeriod = +$parse(attr.silentPeriod)(scope.$parent);
 				if (isNaN(silentPeriod)) {silentPeriod = 250;}
 
-				var minimumChars = +$parse(attr.minChar)(scope);
+				var minimumChars = +$parse(attr.minChar)(scope.$parent);
 				if (isNaN(minimumChars)) {minimumChars = 1;}
 
 				var displayHint = false;
