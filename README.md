@@ -7,6 +7,7 @@ Angular Module: net.enzey.autocomplete
 
 Directive Name: nzAutoComplete
 
+Live Example: http://EnzeyNet.github.io/AutoComplete
 
 | required | directive params | description |
 | ------------- | ------------- | ------------- |
