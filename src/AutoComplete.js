@@ -82,7 +82,9 @@
 							scope.$apply();
 						}
 						if (displayHint === true) {
-							hintInputElem.val(getHintDisplay());
+							var hintDisplayText = getHintDisplay();
+							var userInputString = inputElem.val();
+							hintInputElem.val(userInputString + hintDisplayText.slice(userInputString.length, hintDisplayText.length));
 						}
 					}
 				};
@@ -116,7 +118,7 @@
 					if (!scope.hintables) {scope.hintables = [];}
 
 					if (scope.hintables.length > 0) {
-						var regex = new RegExp('^' + scope.actualText);
+						var regex = new RegExp('^' + scope.actualText, 'i');
 						var objParser = null;
 						if (angular.isDefined(attr.displayPath)) {
 							objParser = $parse(attr.displayPath);
