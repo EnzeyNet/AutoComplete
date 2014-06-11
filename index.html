@@ -27,6 +27,12 @@
 			
 			<div style="height: 60px;"></div>
 			
+			<p>Returns Text (min-char: 3; silent-period: 1000)</p>
+			<div nz-auto-complete get-results-fn="searchFunction" ng-model="select5" min-char="3" silent-period="1000"></div>
+			<div style="float: right"> {{select5}}</div>
+
+			<div style="height: 60px;"></div>
+
 			<p>Selection Required</p>
 			<p>Returns Text</p>
 			<div nz-auto-complete get-results-fn="searchFunction" ng-model="select2" selection-required="true"></div>
