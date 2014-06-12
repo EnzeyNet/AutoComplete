@@ -189,7 +189,7 @@
 				});
 
 				inputElem.bind("keydown", function(e) {
-					if (scope.hintableIndex !== null && (e.keyCode === 13 || e.keyCode === 39)) {
+					if (scope.hintableIndex !== null && e.keyCode === 13) {
 						scope.actualText = getHintDisplay();
 						scope.$apply();
 					} else if (e.keyCode === 40) {
