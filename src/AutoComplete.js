@@ -127,16 +127,18 @@
 						if (angular.isDefined(attr.displayPath)) {
 							objParser = $parse(attr.displayPath);
 						}
+						$timeout(function() {
+							selectRow(0);
+						}, 0, false);
 						scope.hintables.forEach(function(hintObj) {
+							if (!displayHint) {return;}
+
 							if (objParser) {
 								displayHint = displayHint && regex.test(objParser(hintObj));
 							} else {
 								displayHint = displayHint && regex.test(hintObj);
 							}
 						});
-						$timeout(function() {
-							selectRow(0);
-						}, 0, false);
 
 					}
 
@@ -167,7 +169,7 @@
 				};
 
 				scope.$watch('actualText', function() {
-					displayHint = true;
+					displayHint = inputElem[0].scrollWidth <= inputElem[0].clientWidth;
 					scope.hintableIndex = null;
 					hintInputElem.val('');
 					scope.hintables = [];
