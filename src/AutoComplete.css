@@ -75,3 +75,51 @@
 .inputHint .selectedHint {
     background-color: lightblue;
 }
+
+.loadingtrail {
+	color: #ccc;
+	display: inline-block;
+	font-family: "Open Sans", sans-serif;
+	font-weight: 300;
+
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+
+	width: 1em;
+	height: 1em;
+}
+
+.loadingtrail:before {
+	display: block;
+
+	width: 1em;
+	height: 1em;
+
+	border-top: 2px solid #333;
+	border-right: 2px solid transparent;
+
+	content: "";
+
+	-webkit-animation: spin 1s ease infinite;
+	-moz-animation: spin 1s ease infinite;
+	-o-animation: spin 1s ease infinite;
+	animation: spin 1s ease infinite;
+	border-radius: 100%;
+}
+
+@-webkit-keyframes spin {
+  from {transform: rotate( 0deg );}
+  to {transform: rotate( 360deg );}
+}
+@-moz-keyframes spin {
+  from {transform: rotate( 0deg );}
+  to {transform: rotate( 360deg );}
+}
+@-o-keyframes spin {
+  from {transform: rotate( 0deg );}
+  to {transform: rotate( 360deg );}
+}
+@keyframes spin {
+  from {transform: rotate( 0deg );}
+  to {transform: rotate( 360deg );}
+}
