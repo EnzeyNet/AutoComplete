@@ -28,6 +28,10 @@
 		return permute(datums);
 	};
 
+	module.run(function($templateCache) {
+		$templateCache.put('object.html', '<div nz-auto-complete-hint-text></div>');
+	});
+
 	module.controller('autoCompeteExample', function($scope, $timeout, $rootScope, $q) {
 		var getWatchCount = function (scope, scopeHash) {
 			// default for scopeHash
@@ -63,7 +67,7 @@
 		};
 		updateWatchCount();
 
-		var arrayOfStuff = ['fruit', 'fun', 'family', 'fudge', 'nonfrugal', 'nonliquid', 'nonunison', 'neckpiece', 'nonnitric', 'nastiness', 'novachord', 'nonsaline', 'nonchurch', 'narcotist', 'nucleolus', 'nonbodily', 'nonmucous', 'nondebtor', 'nursemaid', 'nepheline', 'nonsuccor', 'nebulated', 'norwegian', 'nachising'];
+		var arrayOfStuff = ['fruit', 'fun', 'family', 'fudge', 'nonfrugal', 'nonliquid', 'nonunison', 'neckpiece', 'nonnitric', 'nastiness', 'novachord', 'nonsaline', 'nonchurch', 'narcotist', 'nucleolus', 'nonbodily', 'nonmucous', 'nondebtor', 'nursemaid', 'nepheline', 'nonsuccor', 'nebulated', 'norwegian', 'nachising', 'nomnomnom'];
 		var arrayOfObjs = [];
 		arrayOfStuff.forEach(function(text) {
 			arrayOfObjs.push({foo: {bar: text}});
@@ -75,7 +79,7 @@
 				return deferredFn.promise;
 			}
 
-			var regex = new RegExp('^' + inputText);
+			var regex = new RegExp('^' + inputText, 'i');
 			var results = [];
 			arrayOfStuff.forEach(function(text) {
 				if (regex.test(text)) {results.push(text);}
@@ -92,7 +96,7 @@
 			}
 
 			$timeout(function() {
-				var regex = new RegExp('^' + inputText);
+				var regex = new RegExp('^' + inputText, 'i');
 				var results = [];
 				arrayOfObjs.forEach(function(obj) {
 					if (regex.test(obj.foo.bar)) {results.push(obj);}
@@ -110,7 +114,7 @@
 				return deferredFn.promise;
 			}
 
-			var regex = new RegExp(inputText);
+			var regex = new RegExp(inputText, 'i');
 			var results = [];
 			arrayOfObjs.forEach(function(obj) {
 				if (regex.test(obj.foo.bar)) {results.push(obj);}

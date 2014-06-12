@@ -1,12 +1,57 @@
 (function(angular) {
-	var module = angular.module('net.enzey.autocomplete', []);
+	var module = angular.module('net.enzey.autocomplete', ['ngSanitize']);
+
+	var defaultTemplateUrl = 'AutoComplete/hintTemplate.html';
+	module.run(function($templateCache) {
+		var defaultTemplate = '<div nz-auto-complete-hint-text></div>';
+		$templateCache.put(defaultTemplateUrl, defaultTemplate);
+	});
+
+	module.directive('nzAutoCompleteHintText', function($parse, $sce) {
+		return {
+			restrict: 'AE',
+			controller: function ($scope) {
+				$scope.highlightedText = function() {
+					var hintText = $scope.displayPath === null ? 'hint' : 'hint.' + $scope.displayPath;
+					var highlightRegExp =  new RegExp('(' + $scope.actualText +  ')', 'gi');
+					var text = $parse(hintText)(this);
+					var markedText = text.replace(highlightRegExp, '<mark>$1</mark>');
+					return $sce.trustAsHtml(markedText);
+				};
+			},
+			compile: function (element, attr) {
+				var highlightedText = angular.element('<div ng-bind-html="highlightedText()"></div>');
+				element.append(highlightedText);
+			}
+		};
+	});
+
+	module.directive('nzAutoCompleteInclude', function($compile, $http, $templateCache) {
+		return {
+			restrict: 'AE',
+			link: function (scope, element, attr) {
+				$http.get(attr.nzAutoCompleteInclude, {cache: $templateCache})
+				.success(function(html) {
+					element.append($compile(html)(scope));
+				});
+			}
+		};
+	});
 
 	module.directive('nzAutoComplete', function($compile, $parse, $timeout) {
 		return {
 			scope: {},
+			transclude: true,
 			restrict: 'AE',
 			link: function (scope, element, attr) {
 				element.addClass('inputHint');
+				scope.hints = [];
+				scope.actualText = '';
+
+				scope.displayPath = null;
+				if (angular.isDefined(attr.displayPath)) {
+					scope.displayPath = attr.displayPath;
+				}
 
 				var positionHintsFn = function(hintList, inputElem) {
 					var scroller = hintList.find('div')[0];
@@ -16,6 +61,9 @@
 						angular.element(scroller).css('overflow-y', '');
 					}
 				};
+				if (angular.isDefined(attr.positionHintsFn)) {
+					positionHintsFn = $parse(attr.positionHintsFn)(scope.$parent);
+				}
 				/*
 				positionHintsFn = function(hintList, inputElem) {
 					$(hintList).position({
@@ -27,12 +75,47 @@
 				}
 				*/
 
-				var pendingResultsFunctionCall;
-				var silentPeriod = +$parse(attr.silentPeriod)(scope);
+				var displaySuggestions = function(hintResults) {
+					scope.hints = hintResults;
+					if (!scope.hints) {scope.hints = [];}
+
+					if (scope.hints.length > 0) {
+						var regex = new RegExp('^' + scope.actualText, 'i');
+						var objParser = null;
+						if (scope.displayPath !== null) {
+							objParser = $parse(scope.displayPath);
+						}
+						$timeout(function() {
+							selectRow(0);
+						}, 0, false);
+						scope.hints.forEach(function(hintObj) {
+							if (!displayHint) {return;}
+
+							if (objParser) {
+								displayHint = displayHint && regex.test(objParser(hintObj));
+							} else {
+								displayHint = displayHint && regex.test(hintObj);
+							}
+						});
+
+					}
+
+					if (positionHintsFn) {
+						$timeout(function() {
+							positionHintsFn(hintList, inputElem);
+						}, 1, false);
+					}
+
+				};
+
+				var silentPeriod = +$parse(attr.silentPeriod)(scope.$parent);
 				if (isNaN(silentPeriod)) {silentPeriod = 250;}
 
-				var minimumChars = +$parse(attr.minChar)(scope);
+				var minimumChars = +$parse(attr.minChar)(scope.$parent);
 				if (isNaN(minimumChars)) {minimumChars = 1;}
+				if (minimumChars === 0) {
+					getResultsFn(scope.actualText).then(displaySuggestions);
+				}
 
 				var displayHint = false;
 				var getResultsFn = $parse(attr.getResultsFn)(scope.$parent);
@@ -41,30 +124,29 @@
 				}
 
 				var isSelectionRequired = false;
-				if ( (angular.isDefined(attr.selectionRequired) && attr.selectionRequired === 'true') || 
-						angular.isDefined(attr.displayPath) ) {
+				if (angular.isDefined(attr.selectionRequired) && attr.selectionRequired === 'true') {
 					isSelectionRequired = true;
 				}
 
 				var hintInputElem = $compile('<input class="hintBox" tabindex="-1"></input>')(scope);
                 var inputElem     = $compile('<input class="textEntry" ng-model="actualText"></input>')(scope);
 
-				var getHintDisplay = function() {
-					var hintDisplayObj = scope.hintables[scope.hintableIndex];
-					if (angular.isDefined(attr.displayPath)) {
-						return $parse(attr.displayPath)(hintDisplayObj);
-					}
-					return hintDisplayObj;
-				};
-
 				element.append(hintInputElem);
 				element.append($compile('<iframe></iframe>')(scope));
 				element.append(inputElem);
 
-				var selectRow = function(index, skipApply) {
-					if (index === scope.hintableIndex) {return;}
+				var getHintDisplay = function() {
+					var hintDisplayObj = scope.hints[scope.selectedHintIndex];
+					if (scope.displayPath !== null) {
+						return $parse(scope.displayPath)(hintDisplayObj);
+					}
+					return hintDisplayObj;
+				};
 
-					if (0 <= index && index < scope.hintables.length) {
+				var selectRow = function(index, skipApply) {
+					if (index === scope.selectedHintIndex) {return;}
+
+					if (0 <= index && index < scope.hints.length) {
 						var scroller = hintList.find('div')[0];
 						var hints =   angular.element(scroller).children();
 						var newHint = angular.element(hints[index]);
@@ -77,18 +159,20 @@
 							scroller.scrollTop = newHint[0].offsetTop + newHint[0].clientHeight - scroller.clientHeight + 1;
 						}
 
-						scope.hintableIndex = index;
+						scope.selectedHintIndex = index;
 						if (!skipApply) {
 							scope.$apply();
 						}
 						if (displayHint === true) {
-							hintInputElem.val(getHintDisplay());
+							var hintDisplayText = getHintDisplay();
+							var userInputString = inputElem.val();
+							hintInputElem.val(userInputString + hintDisplayText.slice(userInputString.length, hintDisplayText.length));
 						}
 					}
 				};
 
                 scope.select = function(selectedIndex) {
-                    scope.hintableIndex = selectedIndex;
+                    scope.selectedHintIndex = selectedIndex;
 					scope.actualText = getHintDisplay();
                     inputElem[0].focus();
                 };
@@ -97,56 +181,15 @@
 					selectRow(selectedIndex, true);
                 };
 
-				var hintText = angular.isDefined(attr.displayPath) ? 'hint.' + attr.displayPath : 'hint';
-                var hintList = $compile('<div class="scrollerContainer" ng-hide="hintables.length < 2"><iframe></iframe><div class="scroller"><div class="hint" ng-repeat="hint in hintables" ng-click="select($index)" ng-mouseover="hoverOver($index)" ng-class="{selectedHint: $index === hintableIndex}"><div>{{' + hintText + '}}</div></div></div></div>')(scope);
+				var templateUrl = angular.isDefined(attr.templateUrl) ? attr.templateUrl : defaultTemplateUrl;
+                var hintList = $compile('<div class="scrollerContainer" ng-hide="hints.length < 2"><iframe></iframe><div class="scroller"><div class="hint" ng-repeat="hint in hints" ng-click="select($index)" ng-mouseover="hoverOver($index)" ng-class="{selectedHint: $index === selectedHintIndex}"><div nz-auto-complete-include="' + templateUrl + '"></div></div></div></div>')(scope);
                 element.append(hintList);
-
-				scope.actualText = '';
-
-				inputElem.bind("focus", function() {
-					if (positionHintsFn && scope.hintables) {
-						$timeout(function() {
-							positionHintsFn(hintList, inputElem);
-						}, 1, false);
-					}
-				});
-
-				var displaySuggestions = function(hintResults) {
-					scope.hintables = hintResults;
-					if (!scope.hintables) {scope.hintables = [];}
-
-					if (scope.hintables.length > 0) {
-						var regex = new RegExp('^' + scope.actualText);
-						var objParser = null;
-						if (angular.isDefined(attr.displayPath)) {
-							objParser = $parse(attr.displayPath);
-						}
-						scope.hintables.forEach(function(hintObj) {
-							if (objParser) {
-								displayHint = displayHint && regex.test(objParser(hintObj));
-							} else {
-								displayHint = displayHint && regex.test(hintObj);
-							}
-						});
-						$timeout(function() {
-							selectRow(0);
-						}, 0, false);
-
-					}
-
-					if (positionHintsFn) {
-						$timeout(function() {
-							positionHintsFn(hintList, inputElem);
-						}, 1, false);
-					}
-
-				};
 
 				var setParentModel = function() {
 					if (isSelectionRequired) {
-						var selectedObj = scope.hintables[scope.hintableIndex];
-						if (scope.hintables && scope.hintables.length > 0 && 
-						( scope.actualText === selectedObj || scope.actualText === $parse(attr.displayPath)(selectedObj) ) ) {
+						var selectedObj = scope.hints[scope.selectedHintIndex];
+						if (scope.hints && scope.hints.length > 0 &&
+						( scope.actualText === selectedObj || scope.actualText === $parse(scope.displayPath)(selectedObj) ) ) {
 							$parse(attr.ngModel).assign(scope.$parent, selectedObj);
 						} else {
 							$parse(attr.ngModel).assign(scope.$parent);
@@ -160,16 +203,18 @@
 					}
 				};
 
+				var pendingResultsFunctionCall;
 				scope.$watch('actualText', function() {
-					displayHint = true;
-					scope.hintableIndex = null;
+					displayHint = inputElem[0].scrollWidth <= inputElem[0].clientWidth;
+					setParentModel();
+
+					scope.selectedHintIndex = null;
 					hintInputElem.val('');
-					scope.hintables = [];
+					scope.hints = [];
 
 					// Stop any pending requests
 					$timeout.cancel(pendingResultsFunctionCall);
 
-					setParentModel();
 					if (minimumChars <= scope.actualText.length) {
 						pendingResultsFunctionCall = $timeout(function() {
 							// ... Display loading indication ...
@@ -178,18 +223,26 @@
 					}
 				});
 
+				inputElem.bind("focus", function() {
+					if (positionHintsFn && scope.hints) {
+						$timeout(function() {
+							positionHintsFn(hintList, inputElem);
+						}, 1, false);
+					}
+				});
+
 				inputElem.bind("keydown", function(e) {
-					if (scope.hintableIndex !== null && (e.keyCode === 13 || e.keyCode === 39)) {
+					if (scope.selectedHintIndex !== null && e.keyCode === 13) {
 						scope.actualText = getHintDisplay();
 						scope.$apply();
 					} else if (e.keyCode === 40) {
 						// key down
-						if (scope.hintableIndex !== null && scope.hintables.length > 1) {
+						if (scope.selectedHintIndex !== null && scope.hints.length > 1) {
 							var newIndex;
-							if (scope.hintableIndex === scope.hintables.length - 1) {
+							if (scope.selectedHintIndex === scope.hints.length - 1) {
 								newIndex = 0;
 							} else {
-								newIndex = scope.hintableIndex + 1;
+								newIndex = scope.selectedHintIndex + 1;
 							}
 							selectRow(newIndex);
 						}
@@ -197,12 +250,12 @@
                         e.stopPropagation();
 					} else if (e.keyCode === 38) {
 						// key up
-						if (scope.hintableIndex !== null && scope.hintables.length > 1) {
+						if (scope.selectedHintIndex !== null && scope.hints.length > 1) {
 							var newIndex;
-							if (scope.hintableIndex === 0) {
-								newIndex = scope.hintables.length - 1;
+							if (scope.selectedHintIndex === 0) {
+								newIndex = scope.hints.length - 1;
 							} else {
-								newIndex = scope.hintableIndex - 1;
+								newIndex = scope.selectedHintIndex - 1;
 							}
 							selectRow(newIndex);
 						}
