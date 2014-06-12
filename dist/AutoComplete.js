@@ -128,12 +128,14 @@
 					isSelectionRequired = true;
 				}
 
-				var hintInputElem = $compile('<input class="hintBox" tabindex="-1"></input>')(scope);
-                var inputElem     = $compile('<input class="textEntry" ng-model="actualText"></input>')(scope);
+				var hintInputElem  = $compile('<input class="hintBox" tabindex="-1"></input>')(scope);
+				var inputElem      = $compile('<input class="textEntry" ng-model="actualText"></input>')(scope);
+				var spinnerElem = $compile('<div class="loadingtrail ng-hide"></div>')(scope);
 
 				element.append(hintInputElem);
 				element.append($compile('<iframe></iframe>')(scope));
 				element.append(inputElem);
+				element.append(spinnerElem);
 
 				var getHintDisplay = function() {
 					var hintDisplayObj = scope.hints[scope.selectedHintIndex];
@@ -212,14 +214,17 @@
 					hintInputElem.val('');
 					scope.hints = [];
 
+					spinnerElem.removeClass('ng-hide')
 					// Stop any pending requests
 					$timeout.cancel(pendingResultsFunctionCall);
 
 					if (minimumChars <= scope.actualText.length) {
 						pendingResultsFunctionCall = $timeout(function() {
-							// ... Display loading indication ...
+							spinnerElem.addClass('ng-hide')
 							getResultsFn(scope.actualText).then(displaySuggestions);
 						}, silentPeriod, true);
+					} else {
+						spinnerElem.addClass('ng-hide')
 					}
 				});
 
