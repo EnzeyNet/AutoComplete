@@ -16,7 +16,6 @@
 						angular.element(scroller).css('overflow-y', '');
 					}
 				};
-
 				if (angular.isDefined(attr.positionHintsFn)) {
 					positionHintsFn = $parse(attr.positionHintsFn)(scope.$parent);
 				}
@@ -31,12 +30,48 @@
 				}
 				*/
 
+				var displaySuggestions = function(hintResults) {
+					scope.hintables = hintResults;
+					if (!scope.hintables) {scope.hintables = [];}
+
+					if (scope.hintables.length > 0) {
+						var regex = new RegExp('^' + scope.actualText, 'i');
+						var objParser = null;
+						if (angular.isDefined(attr.displayPath)) {
+							objParser = $parse(attr.displayPath);
+						}
+						$timeout(function() {
+							selectRow(0);
+						}, 0, false);
+						scope.hintables.forEach(function(hintObj) {
+							if (!displayHint) {return;}
+
+							if (objParser) {
+								displayHint = displayHint && regex.test(objParser(hintObj));
+							} else {
+								displayHint = displayHint && regex.test(hintObj);
+							}
+						});
+
+					}
+
+					if (positionHintsFn) {
+						$timeout(function() {
+							positionHintsFn(hintList, inputElem);
+						}, 1, false);
+					}
+
+				};
+
 				var pendingResultsFunctionCall;
 				var silentPeriod = +$parse(attr.silentPeriod)(scope.$parent);
 				if (isNaN(silentPeriod)) {silentPeriod = 250;}
 
 				var minimumChars = +$parse(attr.minChar)(scope.$parent);
 				if (isNaN(minimumChars)) {minimumChars = 1;}
+				if (minimumChars === 0) {
+					getResultsFn(scope.actualText).then(displaySuggestions);
+				}
 
 				var displayHint = false;
 				var getResultsFn = $parse(attr.getResultsFn)(scope.$parent);
@@ -116,39 +151,6 @@
 						}, 1, false);
 					}
 				});
-
-				var displaySuggestions = function(hintResults) {
-					scope.hintables = hintResults;
-					if (!scope.hintables) {scope.hintables = [];}
-
-					if (scope.hintables.length > 0) {
-						var regex = new RegExp('^' + scope.actualText, 'i');
-						var objParser = null;
-						if (angular.isDefined(attr.displayPath)) {
-							objParser = $parse(attr.displayPath);
-						}
-						$timeout(function() {
-							selectRow(0);
-						}, 0, false);
-						scope.hintables.forEach(function(hintObj) {
-							if (!displayHint) {return;}
-
-							if (objParser) {
-								displayHint = displayHint && regex.test(objParser(hintObj));
-							} else {
-								displayHint = displayHint && regex.test(hintObj);
-							}
-						});
-
-					}
-
-					if (positionHintsFn) {
-						$timeout(function() {
-							positionHintsFn(hintList, inputElem);
-						}, 1, false);
-					}
-
-				};
 
 				var setParentModel = function() {
 					if (isSelectionRequired) {
