@@ -34,7 +34,7 @@
     background-color: transparent;
 }
 
-.inputHint .textEntry:focus  + .scrollerContainer,
+.inputHint .textEntry:focus  ~ .scrollerContainer,
 .inputHint .scrollerContainer:hover {
     display: block;
 }
