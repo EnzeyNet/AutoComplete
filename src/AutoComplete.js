@@ -53,7 +53,8 @@
 					scope.displayPath = attr.displayPath;
 				}
 
-				var positionHintsFn = function(hintList, inputElem) {
+				var positionHintsFn = function(){};
+				var positionAndAddScrollBar = function(hintList, inputElem) {
 					var scroller = hintList.find('div')[0];
 					if (scroller.scrollHeight > scroller.clientHeight) {
 						angular.element(scroller).css('overflow-y', 'scroll');
@@ -62,7 +63,10 @@
 					}
 				};
 				if (angular.isDefined(attr.positionHintsFn)) {
-					positionHintsFn = $parse(attr.positionHintsFn)(scope.$parent);
+					var customPositionFunction = $parse(attr.positionHintsFn)(scope.$parent);
+					if (angular.isFunction(customPositionFunction)) {
+						positionHintsFn = customPositionFunction;
+					}
 				}
 				/*
 				positionHintsFn = function(hintList, inputElem) {
@@ -102,7 +106,9 @@
 
 					if (positionHintsFn) {
 						$timeout(function() {
-							positionHintsFn(hintList, inputElem);
+							if (!positionHintsFn(hintList, inputElem)) {
+								positionAndAddScrollBar(hintList, inputElem);
+							}
 						}, 1, false);
 					}
 
