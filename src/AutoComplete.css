@@ -44,11 +44,10 @@
 }
 
 .autoComplete .hint{
-   margin: 3px;
-   padding: .1em .4em;
-   position: relative;
-   display: block;
-   cursor: pointer;
+	padding: .2em .4em;
+	position: relative;
+	display: block;
+	cursor: pointer;
 }
 
 .autoComplete .textEntry:focus  ~ .scrollerContainer,
@@ -75,6 +74,14 @@
 
 .autoComplete .selectedHint {
 	background-color: lightblue;
+}
+
+.autoComplete .noResults {
+	display: none;
+}
+.autoComplete.noResults .noResults {
+	display: block;
+	cursor: default;
 }
 
 .loading .textEntry {

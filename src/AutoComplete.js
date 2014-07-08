@@ -38,6 +38,15 @@
 		};
 	});
 
+	var positionAndAddScrollBar = function(hintList, inputElem) {
+		var scroller = hintList.find('div')[0];
+		if (scroller.scrollHeight > scroller.clientHeight) {
+			angular.element(scroller).css('overflow-y', 'scroll');
+		} else {
+			angular.element(scroller).css('overflow-y', '');
+		}
+	};
+
 	module.directive('nzAutoComplete', function($compile, $parse, $timeout) {
 		return {
 			scope: {},
@@ -53,21 +62,6 @@
 					scope.displayPath = attr.displayPath;
 				}
 
-				var positionHintsFn = function(){};
-				var positionAndAddScrollBar = function(hintList, inputElem) {
-					var scroller = hintList.find('div')[0];
-					if (scroller.scrollHeight > scroller.clientHeight) {
-						angular.element(scroller).css('overflow-y', 'scroll');
-					} else {
-						angular.element(scroller).css('overflow-y', '');
-					}
-				};
-				if (angular.isDefined(attr.positionHintsFn)) {
-					var customPositionFunction = $parse(attr.positionHintsFn)(scope.$parent);
-					if (angular.isFunction(customPositionFunction)) {
-						positionHintsFn = customPositionFunction;
-					}
-				}
 				/*
 				positionHintsFn = function(hintList, inputElem) {
 					$(hintList).position({
@@ -78,6 +72,13 @@
 					});
 				}
 				*/
+				var positionHintsFn = function(){};
+				if (angular.isDefined(attr.positionHintsFn)) {
+					var customPositionFunction = $parse(attr.positionHintsFn)(scope.$parent);
+					if (angular.isFunction(customPositionFunction)) {
+						positionHintsFn = customPositionFunction;
+					}
+				}
 
 				var displaySuggestions = function(hintResults) {
 					scope.hints = hintResults;
@@ -101,7 +102,8 @@
 								displayHint = displayHint && regex.test(hintObj);
 							}
 						});
-
+					} else {
+						element.addClass('noResults');
 					}
 
 					if (positionHintsFn) {
@@ -114,14 +116,14 @@
 
 				};
 
-				var silentPeriod = +$parse(attr.silentPeriod)(scope.$parent);
-				if (isNaN(silentPeriod)) {silentPeriod = 250;}
-
 				var minimumChars = +$parse(attr.minChar)(scope.$parent);
 				if (isNaN(minimumChars)) {minimumChars = 1;}
 				if (minimumChars === 0) {
 					getResultsFn(scope.actualText).then(displaySuggestions);
 				}
+
+				var silentPeriod = +$parse(attr.silentPeriod)(scope.$parent);
+				if (isNaN(silentPeriod)) {silentPeriod = 250;}
 
 				var displayHint = false;
 				var getResultsFn = $parse(attr.getResultsFn)(scope.$parent);
@@ -132,6 +134,11 @@
 				var isSelectionRequired = false;
 				if (angular.isDefined(attr.selectionRequired) && attr.selectionRequired === 'true') {
 					isSelectionRequired = true;
+				}
+
+				scope.noResultsText = "No Results";
+				if (angular.isDefined(attr.noResultsText)) {
+					scope.noResultsText = attr.noResultsText;
 				}
 
 				var hintInputElem  = $compile('<input type="text" class="hintBox" tabindex="-1"></input>')(scope);
@@ -161,10 +168,10 @@
 
 						if (newHint[0].offsetTop < scroller.scrollTop) {
 							// scrollUp
-							scroller.scrollTop = newHint[0].offsetTop - 1;
+							scroller.scrollTop = newHint[0].offsetTop;
 						} else if (newHint[0].offsetTop + newHint[0].clientHeight > scroller.scrollTop + scroller.clientHeight) {
 							// scrollDown
-							scroller.scrollTop = newHint[0].offsetTop + newHint[0].clientHeight - scroller.clientHeight + 1;
+							scroller.scrollTop = newHint[0].offsetTop + newHint[0].clientHeight - scroller.clientHeight;
 						}
 
 						scope.selectedHintIndex = index;
@@ -190,7 +197,23 @@
 				};
 
 				var templateUrl = angular.isDefined(attr.templateUrl) ? attr.templateUrl : defaultTemplateUrl;
-				var hintList = $compile('<div class="scrollerContainer" ng-hide="hints.length < 2"><iframe></iframe><div class="scroller"><div class="hint" ng-repeat="hint in hints" ng-click="select($index)" ng-mouseover="hoverOver($index)" ng-class="{selectedHint: $index === selectedHintIndex}"><div nz-auto-complete-include="' + templateUrl + '"></div></div></div></div>')(scope);
+				var hintList = $compile('\
+					<div class="scrollerContainer">\
+						<iframe></iframe>\
+						<div class="scroller" ng-hide="hints.length < 2">\
+							<div class="hint"\
+									ng-repeat="hint in hints"\
+									ng-click="select($index)"\
+									ng-mouseover="hoverOver($index)"\
+									ng-class="{selectedHint: $index === selectedHintIndex}">\
+								<div nz-auto-complete-include="' + templateUrl + '"></div>\
+							</div>\
+						</div>\
+						<div class="scroller noResults">\
+							<span class="noResults hint">{{noResultsText}}</span>\
+						</div>\
+					</div>\
+				')(scope);
 				element.append(hintList);
 
 				var setParentModel = function() {
@@ -220,6 +243,7 @@
 					hintInputElem.val('');
 					scope.hints = [];
 					element.addClass('loading');
+					element.removeClass('noResults');
 					// Stop any pending requests
 
 					$timeout.cancel(pendingResultsFunctionCall);
