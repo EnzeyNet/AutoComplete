@@ -1,8 +1,8 @@
-.inputHint {
+.autoComplete {
 	position: relative;
 	display: inline-block;
 }
-.inputHint > iframe {
+.autoComplete > iframe {
 	position: relative;
 	top: 0px;
 	left: 0px;
@@ -10,7 +10,7 @@
 	background-color: transparent;
 }
 
-.inputHint iframe {
+.autoComplete iframe {
 	width: 100%;
 	height: 100%;
 	position: absolute;
@@ -20,30 +20,30 @@
 	margin: 0px;
 }
 
-.inputHint input {
+.autoComplete input {
 	margin: 0px;
 	padding: 2px;
 	border-width: 1px;
 	width: 100%;
 }
 
-.inputHint .hintBox {
+.autoComplete .hintBox {
 	position: relative;
 	color: #B0B0B0;
 }
 
-.inputHint .textEntry {
+.autoComplete .textEntry {
 	position: absolute;
 	top: 0px;
 	left: 0px;
 }
 
-.inputHint .textEntry:focus {
+.autoComplete .textEntry:focus {
 	background: transparent;
 	background-color: transparent;
 }
 
-.inputHint .hint{
+.autoComplete .hint{
    margin: 3px;
    padding: .1em .4em;
    position: relative;
@@ -51,19 +51,19 @@
    cursor: pointer;
 }
 
-.inputHint .textEntry:focus  ~ .scrollerContainer,
-.inputHint .scrollerContainer:hover {
+.autoComplete .textEntry:focus  ~ .scrollerContainer,
+.autoComplete .scrollerContainer:hover {
 	display: block;
 }
 
-.inputHint .scrollerContainer {
+.autoComplete .scrollerContainer {
 	position: absolute;
 	display: none;
 	padding: 0;
 	margin: 0;
 }
 
-.inputHint .scroller {
+.autoComplete .scroller {
 	display: block;
 	position: relative;
 	border: 1px solid;
@@ -73,7 +73,7 @@
 	max-height: 8em;
 }
 
-.inputHint .selectedHint {
+.autoComplete .selectedHint {
 	background-color: lightblue;
 }
 

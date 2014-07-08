@@ -44,7 +44,7 @@
 			transclude: true,
 			restrict: 'AE',
 			link: function (scope, element, attr) {
-				element.addClass('inputHint');
+				element.addClass('autoComplete');
 				scope.hints = [];
 				scope.actualText = '';
 
@@ -179,19 +179,19 @@
 					}
 				};
 
-                scope.select = function(selectedIndex) {
-                    scope.selectedHintIndex = selectedIndex;
+				scope.select = function(selectedIndex) {
+					scope.selectedHintIndex = selectedIndex;
 					scope.actualText = getHintDisplay();
-                    inputElem[0].focus();
-                };
+					inputElem[0].focus();
+				};
 
-                scope.hoverOver = function(selectedIndex) {
+				scope.hoverOver = function(selectedIndex) {
 					selectRow(selectedIndex, true);
-                };
+				};
 
 				var templateUrl = angular.isDefined(attr.templateUrl) ? attr.templateUrl : defaultTemplateUrl;
-                var hintList = $compile('<div class="scrollerContainer" ng-hide="hints.length < 2"><iframe></iframe><div class="scroller"><div class="hint" ng-repeat="hint in hints" ng-click="select($index)" ng-mouseover="hoverOver($index)" ng-class="{selectedHint: $index === selectedHintIndex}"><div nz-auto-complete-include="' + templateUrl + '"></div></div></div></div>')(scope);
-                element.append(hintList);
+				var hintList = $compile('<div class="scrollerContainer" ng-hide="hints.length < 2"><iframe></iframe><div class="scroller"><div class="hint" ng-repeat="hint in hints" ng-click="select($index)" ng-mouseover="hoverOver($index)" ng-class="{selectedHint: $index === selectedHintIndex}"><div nz-auto-complete-include="' + templateUrl + '"></div></div></div></div>')(scope);
+				element.append(hintList);
 
 				var setParentModel = function() {
 					if (isSelectionRequired) {
@@ -219,18 +219,18 @@
 					scope.selectedHintIndex = null;
 					hintInputElem.val('');
 					scope.hints = [];
-
-					element.addClass('loading')
+					element.addClass('loading');
 					// Stop any pending requests
+
 					$timeout.cancel(pendingResultsFunctionCall);
 
 					if (minimumChars <= scope.actualText.length) {
 						pendingResultsFunctionCall = $timeout(function() {
-							element.removeClass('loading')
+							element.removeClass('loading');
 							getResultsFn(scope.actualText).then(displaySuggestions);
 						}, silentPeriod, true);
 					} else {
-						element.removeClass('loading')
+						element.removeClass('loading');
 					}
 				});
 
@@ -257,8 +257,8 @@
 							}
 							selectRow(newIndex);
 						}
-                        e.preventDefault();
-                        e.stopPropagation();
+						e.preventDefault();
+						e.stopPropagation();
 					} else if (e.keyCode === 38) {
 						// key up
 						if (scope.selectedHintIndex !== null && scope.hints.length > 1) {
@@ -270,8 +270,8 @@
 							}
 							selectRow(newIndex);
 						}
-                        e.preventDefault();
-                        e.stopPropagation();
+						e.preventDefault();
+						e.stopPropagation();
 					}
 				});
 
