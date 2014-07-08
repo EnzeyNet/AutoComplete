@@ -134,8 +134,8 @@
 					isSelectionRequired = true;
 				}
 
-				var hintInputElem  = $compile('<input class="hintBox" tabindex="-1"></input>')(scope);
-				var inputElem      = $compile('<input class="textEntry" ng-model="actualText"></input>')(scope);
+				var hintInputElem  = $compile('<input type="text" class="hintBox" tabindex="-1"></input>')(scope);
+				var inputElem      = $compile('<input type="text" class="textEntry" ng-model="actualText"></input>')(scope);
 				var spinnerElem = $compile('<div class="loadingIndicator"></div>')(scope);
 
 				element.append(hintInputElem);
