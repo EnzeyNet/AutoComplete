@@ -16,6 +16,7 @@ Live Example: http://EnzeyNet.github.io/AutoComplete
 | false | is-selection-required | If the input must exactly match a hint text. |
 | false | min-char | The minimum number of input characters needed to set the model and call get-results-fn. Leading and trailing spaces are not counted toward the entered character count. |
 | false | silent-period | The amount of time to wait for no input before before calling get-results-fn. Default: 250 |
+| false | no-results-text | The text to display when no results are found. Default: 'No Results' |
 | true | get-results-fn | getResultsFn(inputText) - A promise that returns the hints to display. |
 | false | position-hints-fn | positionHintsFn(hintListElem, inputElem) - Function that allows custom positioning of the hint results.  |
 
