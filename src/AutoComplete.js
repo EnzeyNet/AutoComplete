@@ -136,7 +136,7 @@
 
 				var hintInputElem  = $compile('<input class="hintBox" tabindex="-1"></input>')(scope);
 				var inputElem      = $compile('<input class="textEntry" ng-model="actualText"></input>')(scope);
-				var spinnerElem = $compile('<div class="loadingtrail ng-hide"></div>')(scope);
+				var spinnerElem = $compile('<div class="loadingIndicator"></div>')(scope);
 
 				element.append(hintInputElem);
 				element.append($compile('<iframe></iframe>')(scope));
@@ -220,17 +220,17 @@
 					hintInputElem.val('');
 					scope.hints = [];
 
-					spinnerElem.removeClass('ng-hide')
+					element.addClass('loading')
 					// Stop any pending requests
 					$timeout.cancel(pendingResultsFunctionCall);
 
 					if (minimumChars <= scope.actualText.length) {
 						pendingResultsFunctionCall = $timeout(function() {
-							spinnerElem.addClass('ng-hide')
+							element.removeClass('loading')
 							getResultsFn(scope.actualText).then(displaySuggestions);
 						}, silentPeriod, true);
 					} else {
-						spinnerElem.addClass('ng-hide')
+						element.removeClass('loading')
 					}
 				});
 
