@@ -32,7 +32,7 @@
 			link: function (scope, element, attr) {
 				$http.get(attr.nzAutoCompleteInclude, {cache: $templateCache})
 				.success(function(html) {
-					element.append($compile(html)(scope));
+					element.replaceWith($compile(html)(scope));
 				});
 			}
 		};
@@ -162,17 +162,19 @@
 					if (index === scope.selectedHintIndex) {return;}
 
 					if (0 <= index && index < scope.hints.length) {
-						var scroller = hintList.find('div')[0];
+						var scroller = hintList[0].querySelector('.scroller');
 						var hints =   angular.element(scroller).children();
-						var newHint = angular.element(hints[index]);
 
-						if (newHint[0].offsetTop < scroller.scrollTop) {
-							// scrollUp
-							scroller.scrollTop = newHint[0].offsetTop;
-						} else if (newHint[0].offsetTop + newHint[0].clientHeight > scroller.scrollTop + scroller.clientHeight) {
-							// scrollDown
-							scroller.scrollTop = newHint[0].offsetTop + newHint[0].clientHeight - scroller.clientHeight;
-						}
+						$timeout(function() {
+							var selectedHint = scroller.querySelector('.selectedHint');
+							if (selectedHint.offsetTop < scroller.scrollTop) {
+								// scrollUp
+								scroller.scrollTop = selectedHint.offsetTop;
+							} else if (selectedHint.offsetTop + selectedHint.clientHeight > scroller.scrollTop + scroller.clientHeight) {
+								// scrollDown
+								scroller.scrollTop = selectedHint.offsetTop + selectedHint.clientHeight - scroller.clientHeight;
+							}
+						}, 0, false);
 
 						scope.selectedHintIndex = index;
 						if (!skipApply) {
