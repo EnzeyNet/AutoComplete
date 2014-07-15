@@ -256,6 +256,9 @@
 							}
 						}
 					};
+					scope.$on('clearAutoComplete', function(event, mass) {
+						scope.actualText = '';
+					});
 
 					var pendingResultsFunctionCall;
 					scope.$watch('actualText', function() {
