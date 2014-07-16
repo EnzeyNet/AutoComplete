@@ -16,12 +16,15 @@
 		<link  href="dist/AutoComplete.css" rel="stylesheet" type="text/css"></link>
 	</head>
 	<body>
+
 		<div ng-controller="autoCompeteExample">
 		Angular Watch Count: {{watchCount}}
 			<p>Type 'n' in the input</p>
 			<p>Use up / down arrows to cycle</p>
 			<p>Use enter to accept hint value</p>
 
+			<button ng-click="clear()">Clear Entries</button>
+			<button ng-click="set()">Set Values</button>
 			<div>
 				<p style="display: inline-block">Loading indicator:</p>
 				<div class="loadingtrail"></div>
@@ -47,7 +50,7 @@
 			<div style="height: 60px;"></div>
 
 			<p>Returns Object</p>
-			<div nz-auto-complete get-results-fn="searchFunctionObjs" ng-model="select3"selection-required="true"  display-path="foo.bar"></div>
+			<div nz-auto-complete no-results-text="foooo bar" get-results-fn="searchFunctionObjs" ng-model="select3" selection-required="true"  display-path="foo.bar"></div>
 			<div style="float: right"> {{select3}}</div>
 
 			<div style="height: 60px;"></div>

@@ -33,6 +33,23 @@
 	});
 
 	module.controller('autoCompeteExample', function($scope, $timeout, $rootScope, $q) {
+		$scope.select2 = 'No';
+		$scope.select3 = {foo: {bar: 'No'}};
+
+		$scope.clear = function() {
+			$scope.select1 = null;
+			$scope.select2 = null;
+			$scope.select3 = null;
+			$scope.select4 = null;
+			$scope.select5 = null;
+		};
+		$scope.set = function() {
+			$scope.select1 = 'no';
+			$scope.select2 = 'No';
+			$scope.select3 = {foo: {bar: 'No'}};
+			$scope.select4 = null;
+			$scope.select5 = 'NO';
+		};
 		var getWatchCount = function (scope, scopeHash) {
 			// default for scopeHash
 			if (scopeHash === undefined) {
