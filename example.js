@@ -6,28 +6,6 @@
 		]
 	);
 
-	var getPerms = function(datums) {
-		var permArr = [];
-		var usedChars = [];
-
-		function permute(input) {
-			var i, ch;
-			for (i = 0; i < input.length; i++) {
-				ch = input.splice(i, 1)[0];
-				usedChars.push(ch);
-				if (input.length == 0) {
-					permArr.push(usedChars.slice());
-				}
-				permute(input);
-				input.splice(i, 0, ch);
-				usedChars.pop();
-			}
-			return permArr
-		};
-
-		return permute(datums);
-	};
-
 	module.run(function($templateCache) {
 		$templateCache.put('object.html', '<div nz-auto-complete-hint-text></div>');
 	});
@@ -141,7 +119,22 @@
 			return deferredFn.promise;
 		}
 
-		var data = getPerms(['a', 'b', 'c', 'd', 'e', 'f', 'g']);
+		$scope.searchFunctionStaticData = function (inputText) {
+			var deferredFn = $q.defer();
+			if (!inputText || inputText.length < 1) {
+				deferredFn.resolve(arrayOfStuff);
+				return deferredFn.promise;
+			}
+
+			var regex = new RegExp(inputText, 'i');
+			var results = [];
+			arrayOfStuff.forEach(function(text) {
+				if (regex.test(text)) {results.push(text);}
+			});
+
+			deferredFn.resolve(results);
+			return deferredFn.promise;
+		}
 
 	});
 

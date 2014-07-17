@@ -135,7 +135,6 @@
 				var displayHint = false;
 				return {
 					pre: function(scope, element, attrs) {
-						var modelCtrl = scope[controllerName];
 						scope.hints = [];
 
 						scope.displayPath = null;
@@ -152,48 +151,7 @@
 							scope.selectRow(selectedIndex);
 						};
 
-					},
-					post: function (scope, element, attrs) {
-						var modelCtrl = scope[controllerName];
-
-						/*
-						positionHintsFn = function(hintList, inputElem) {
-							$(hintList).position({
-								my: "left top",
-								at: "left bottom",
-								of: inputElem,
-								collision: 'flip'
-							});
-						}
-						*/
-						var positionHintsFn = function(){};
-						if (angular.isDefined(attrs.positionHintsFn)) {
-							var customPositionFunction = $parse(attrs.positionHintsFn)(scope.$parent);
-							if (angular.isFunction(customPositionFunction)) {
-								positionHintsFn = customPositionFunction;
-							}
-						}
-
-						var getResultsFn = $parse(attrs.getResultsFn)(scope.$parent);
-						if (!getResultsFn || !typeof getResultsFn === 'function') {
-							throw 'A function that returns results is required!';
-						}
-
-						var minimumChars = +$parse(attrs.minChar)(scope.$parent);
-						if (isNaN(minimumChars)) {minimumChars = 1;}
-						if (minimumChars === 0) {
-							getResultsFn( modelCtrl.$viewValue ).then(displaySuggestions);
-						}
-
-						var silentPeriod = +$parse(attrs.silentPeriod)(scope.$parent);
-						if (isNaN(silentPeriod)) {silentPeriod = 250;}
-
-						var isSelectionRequired = false;
-						if (angular.isDefined(attrs.selectionRequired) && attrs.selectionRequired === 'true') {
-							isSelectionRequired = true;
-						}
-
-						var getHintDisplay = function() {
+						scope.getHintDisplay = function() {
 							var hintDisplayObj = scope.hints[scope.selectedHintIndex];
 							if (scope.displayPath !== null) {
 								return $parse(scope.displayPath)(hintDisplayObj);
@@ -222,20 +180,34 @@
 
 								scope.selectedHintIndex = index;
 								if (displayHint === true) {
-									var hintDisplayText = getHintDisplay();
+									var hintDisplayText = scope.getHintDisplay();
 									var userInputString = inputElem.val();
 									hintInputElem.val(userInputString + hintDisplayText.slice(userInputString.length, hintDisplayText.length));
 								}
 							}
 						};
 
-						scope.select = function(selectedIndex) {
-							scope.selectedHintIndex = selectedIndex;
-							modelCtrl.$setViewValue(getHintDisplay());
-							scope.actualText = modelCtrl.$viewValue;
-							inputElem.val(modelCtrl.$viewValue);
-							inputElem[0].focus();
-						};
+						/*
+						positionHintsFn = function(hintList, inputElem) {
+							$(hintList).position({
+								my: "left top",
+								at: "left bottom",
+								of: inputElem,
+								collision: 'flip'
+							});
+						}
+						*/
+						scope.positionHintsFn = function(){};
+						if (angular.isDefined(attrs.positionHintsFn)) {
+							var customPositionFunction = $parse(attrs.positionHintsFn)(scope.$parent);
+							if (angular.isFunction(customPositionFunction)) {
+								scope.positionHintsFn = customPositionFunction;
+							}
+						}
+
+					},
+					post: function (scope, element, attrs) {
+						var modelCtrl = scope[controllerName];
 
 						var displaySuggestions = function(hintResults) {
 							scope.hints = hintResults;
@@ -261,15 +233,65 @@
 								element.addClass('noResults');
 							}
 
-							if (positionHintsFn) {
-								$timeout(function() {
-									if (!positionHintsFn(hintList, inputElem)) {
-										positionAndAddScrollBar(hintList, inputElem);
-									}
-								}, 0, false);
-							}
+							$timeout(function() {
+								if (!scope.positionHintsFn(hintList, inputElem)) {
+									positionAndAddScrollBar(hintList, inputElem);
+								}
+							}, 0, false);
 
 						};
+
+						var getResultsFn = $parse(attrs.getResultsFn)(scope.$parent);
+						if (!getResultsFn || !typeof getResultsFn === 'function') {
+							throw 'A function that returns results is required!';
+						}
+						var pendingResultsFunctionCall;
+						var getResults = function() {
+							displayHint = inputElem[0].scrollWidth <= inputElem[0].clientWidth;
+							//setParentModel();
+
+							scope.selectedHintIndex = null;
+							scope.hints = [];
+							element.addClass('loading');
+							element.removeClass('noResults');
+							// Stop any pending requests
+
+							$timeout.cancel(pendingResultsFunctionCall);
+
+							if (angular.isDefined(modelCtrl.$viewValue) && minimumChars <= modelCtrl.$viewValue.length) {
+								pendingResultsFunctionCall = $timeout(function() {
+									element.removeClass('loading');
+									getResultsFn( modelCtrl.$viewValue ).then(displaySuggestions);
+								}, silentPeriod, true);
+							} else {
+								element.removeClass('loading');
+							}
+						};
+
+						scope.select = function(selectedIndex) {
+							scope.selectedHintIndex = selectedIndex;
+							modelCtrl.$setViewValue(scope.getHintDisplay());
+							scope.actualText = modelCtrl.$viewValue;
+							inputElem.val(modelCtrl.$viewValue);
+							inputElem[0].focus();
+						};
+
+						var minimumChars = +$parse(attrs.minChar)(scope.$parent);
+						if (isNaN(minimumChars)) {minimumChars = 1;}
+						if (minimumChars === 0) {
+							if (!modelCtrl.$viewValue) {
+								modelCtrl.$setViewValue('');
+							}
+							getResults();
+						}
+
+						var silentPeriod = +$parse(attrs.silentPeriod)(scope.$parent);
+						if (isNaN(silentPeriod)) {silentPeriod = 250;}
+
+						var isSelectionRequired = false;
+						if (angular.isDefined(attrs.selectionRequired) && attrs.selectionRequired === 'true') {
+							isSelectionRequired = true;
+						}
 
 						modelCtrl.$parsers.push(function(value) {
 							hintInputElem.val('');
@@ -306,34 +328,11 @@
 							return result;
 						});
 
-						var pendingResultsFunctionCall;
-						var getResults = function() {
-							displayHint = inputElem[0].scrollWidth <= inputElem[0].clientWidth;
-							//setParentModel();
-
-							scope.selectedHintIndex = null;
-							scope.hints = [];
-							element.addClass('loading');
-							element.removeClass('noResults');
-							// Stop any pending requests
-
-							$timeout.cancel(pendingResultsFunctionCall);
-
-							if (modelCtrl.$viewValue && minimumChars <= modelCtrl.$viewValue.length) {
-								pendingResultsFunctionCall = $timeout(function() {
-									element.removeClass('loading');
-									getResultsFn( modelCtrl.$viewValue ).then(displaySuggestions);
-								}, silentPeriod, true);
-							} else {
-								element.removeClass('loading');
-							}
-						};
-
 						inputElem.bind("focus", function() {
-							if (positionHintsFn && scope.hints) {
+							if (scope.hints && scope.hints.length > 0) {
 								$timeout(function() {
-									positionHintsFn(hintList, inputElem);
-								}, 1, false);
+									scope.positionHintsFn(hintList, inputElem);
+								}, 0, false);
 							}
 						});
 

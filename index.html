@@ -30,6 +30,12 @@
 				<div class="loadingtrail"></div>
 			</div>
 
+			<p>As a filtered dropdown, no input required to display suggestions, selection required for the model to be set.</p>
+			<div nz-auto-complete get-results-fn="searchFunctionStaticData" ng-model="selectDropDown" min-char="0" silent-period="0" selection-required="true"></div>
+			<div style="float: right"> {{selectDropDown}}</div>
+
+			<div style="height: 60px;"></div>
+
 			<p>Returns Text</p>
 			<div nz-auto-complete get-results-fn="searchFunction" ng-model="select1"></div>
 			<div style="float: right"> {{select1}}</div>
