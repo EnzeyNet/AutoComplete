@@ -57,15 +57,16 @@
 		return {
 			scope: {},
 			restrict: 'AE',
-			template: function(element, attr) {
-				element.addClass('autoComplete');
+			compile: function ($element, $attrs) {
+				$element.addClass('autoComplete');
 
-				var inputElem = element[0].querySelector('input');
+				var inputElem = $element[0].querySelector('input');
 				if (inputElem) {
 					inputElem = angular.element(inputElem);
 				} else {
 					inputElem = angular.element('<input type="text"></input>');
 				}
+				$element.empty();
 				inputElem.removeAttr('ng-model');
 				inputElem.removeAttr('data-ng-model');
 				var hintInputElem = inputElem.clone();
@@ -76,21 +77,14 @@
 				hintInputElem.attr('tabindex', '-1');
 				hintInputElem.removeAttr('placeholder');
 
-				var wrapper = angular.element('<div></div>');
-				wrapper.append(hintInputElem);
-				wrapper.append(angular.element('<iframe></iframe>'));
-				wrapper.append(inputElem);
-				wrapper.append(angular.element('<div class="loadingIndicator"></div>'));
-
-				element.empty();
-				return wrapper[0].innerHTML;
-			},
-			compile: function ($element, $attrs) {
-				var inputElem =     angular.element($element[0].querySelector('.textEntry'));
-				var hintInputElem = angular.element($element[0].querySelector('.hintBox'));
-
 				var ngModelName = '$parent.' + $attrs.ngModel;
 				inputElem.attr('ng-model', ngModelName);
+
+				var wrapper = angular.element('<div></div>');
+				$element.append(hintInputElem);
+				$element.append(angular.element('<iframe></iframe>'));
+				$element.append(inputElem);
+				$element.append(angular.element('<div class="loadingIndicator"></div>'));
 
 				var templateUrl = angular.isDefined($attrs.templateUrl) ? $attrs.templateUrl : "'" + defaultTemplateUrl + "'";
 				var hintList = angular.element('\
@@ -165,7 +159,10 @@
 
 					},
 					post: function (scope, element, attrs) {
-						var modelCtrl = angular.element(inputElem).controller('ngModel');
+						var inputElem =     angular.element($element[0].querySelector('.textEntry'));
+						var hintInputElem = angular.element($element[0].querySelector('.hintBox'));
+
+						var modelCtrl = inputElem.controller('ngModel');
 						scope.ngModelCtrl = modelCtrl;
 
 						/*
