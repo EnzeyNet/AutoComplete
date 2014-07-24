@@ -246,6 +246,7 @@
 							var selectedObj = scope.hints[scope.selectedHintIndex];
 							$parse(ngModelName).assign(scope, selectedObj);
 							inputElem[0].focus();
+							scope.$emit('AutoCompleteSelect', selectedObj);
 						};
 
 						var displaySuggestions = function(hintResults) {
