@@ -14,6 +14,7 @@
 		$scope.select2 = 'No';
 		$scope.select3 = {foo: {bar: 'No'}};
 
+		$scope.$on('AutoCompleteSelect', function (event, selection) {console.log(selection);});
 		$scope.clear = function() {
 			$scope.select1 = null;
 			$scope.select2 = null;
