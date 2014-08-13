@@ -211,9 +211,15 @@
 						if (isNaN(silentPeriod)) {silentPeriod = 250;}
 
 						var isSelectionRequired = false;
-						if (isDefined(attrs.selectionRequired) && attrs.selectionRequired === 'true') {
+						if (attrs.selectionRequired === '' || attrs.selectionRequired === 'true') {
 							isSelectionRequired = true;
 						}
+
+						var noResultsOnSelect = false;
+						if (attrs.noResultsOnSelect === '' || attrs.noResultsOnSelect === 'true') {
+							noResultsOnSelect = true;
+						}
+						var ignoreNextRestuls = false;
 
 						var getHintDisplay = function() {
 							var hintDisplayObj = scope.hints[scope.selectedHintIndex];
@@ -257,6 +263,9 @@
 							$parse(ngModelName).assign(scope.$parent, selectedObj);
 							inputElem[0].focus();
 							scope.$emit('AutoCompleteSelect', selectedObj);
+							if (noResultsOnSelect) {
+								ignoreNextRestuls = true;
+							}
 						};
 
 						var displaySuggestions = function(hintResults) {
@@ -338,19 +347,23 @@
 
 							scope.selectedHintIndex = null;
 							scope.hints = [];
-							element.addClass('loading');
 							element.removeClass('noResults');
 							// Stop any pending requests
 
 							$timeout.cancel(pendingResultsFunctionCall);
 
-							if (modelCtrl.$viewValue && minimumChars <= modelCtrl.$viewValue.length) {
-								pendingResultsFunctionCall = $timeout(function() {
-									element.removeClass('loading');
-									getResultsFn( modelCtrl.$viewValue ).then(displaySuggestions);
-								}, silentPeriod, true);
+							if (ignoreNextRestuls) {
+								ignoreNextRestuls = false;
 							} else {
-								element.removeClass('loading');
+								element.addClass('loading');
+								if (modelCtrl.$viewValue && minimumChars <= modelCtrl.$viewValue.length) {
+									pendingResultsFunctionCall = $timeout(function() {
+										element.removeClass('loading');
+										getResultsFn( modelCtrl.$viewValue ).then(displaySuggestions);
+									}, silentPeriod, true);
+								} else {
+									element.removeClass('loading');
+								}
 							}
 						};
 
