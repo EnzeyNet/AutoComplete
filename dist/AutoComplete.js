@@ -1,14 +1,6 @@
 (function(angular) {
 	var module = angular.module('net.enzey.autocomplete', ['ngSanitize']);
 
-	module.directive('nzT', function($parse) {
-		return {
-			transclude: true,
-			restrict: 'AE',
-			template: '<div ng-transclude></div>'
-		};
-	});
-
 	var isDefined = function(value) {
 		if (value !== null & value !== undefined) {
 			if (angular.isNumber(value) && !isNaN(value)) {
@@ -138,7 +130,6 @@
 				$element.append(inputElem);
 				$element.append(angular.element('<div class="loadingIndicator"></div>'));
 
-				var displayHint = false;
 				return {
 					pre: function(scope, element, attrs) {
 						scope.hints = [];
@@ -219,9 +210,15 @@
 						if (isNaN(silentPeriod)) {silentPeriod = 250;}
 
 						var isSelectionRequired = false;
-						if (isDefined(attrs.selectionRequired) && attrs.selectionRequired === 'true') {
+						if (attrs.selectionRequired === '' || attrs.selectionRequired === 'true') {
 							isSelectionRequired = true;
 						}
+
+						var noResultsOnSelect = false;
+						if (attrs.noResultsOnSelect === '' || attrs.noResultsOnSelect === 'true') {
+							noResultsOnSelect = true;
+						}
+						var ignoreNextRestuls = false;
 
 						var getHintDisplay = function() {
 							var hintDisplayObj = scope.hints[scope.selectedHintIndex];
@@ -237,10 +234,26 @@
 								var scroller = element[0].querySelector('.scroller');
 
 								scope.selectedHintIndex = index;
-								if (displayHint === true) {
+
+								var displayHint = !(inputElem[0].scrollWidth > inputElem[0].clientWidth);
+
+								if (displayHint) {
 									var hintDisplayText = getHintDisplay();
+									var regex = new RegExp('^' + modelCtrl.$viewValue, 'i');
+									var objParser = objParser = $parse(scope.displayPath);
+									if (scope.displayPath !== null) {
+										var objParser = objParser = $parse(scope.displayPath);
+										displayHint = regex.test(objParser(hintDisplayText));
+									} else {
+										displayHint = regex.test(hintDisplayText);
+									}
+								}
+
+								if (displayHint === true) {
 									var userInputString = inputElem.val();
 									hintInputElem.val(userInputString + hintDisplayText.slice(userInputString.length, hintDisplayText.length));
+								} else {
+									hintInputElem.val('');
 								}
 
 								$timeout(function() {
@@ -265,6 +278,9 @@
 							$parse(ngModelName).assign(scope.$parent, selectedObj);
 							inputElem[0].focus();
 							scope.$emit('AutoCompleteSelect', selectedObj);
+							if (noResultsOnSelect) {
+								ignoreNextRestuls = true;
+							}
 						};
 
 						var displaySuggestions = function(hintResults) {
@@ -272,20 +288,6 @@
 							if (!scope.hints) {scope.hints = [];}
 
 							if (scope.hints.length > 0) {
-								var regex = new RegExp('^' + modelCtrl.$viewValue, 'i');
-								var objParser = null;
-								if (scope.displayPath !== null) {
-									objParser = $parse(scope.displayPath);
-								}
-								scope.hints.forEach(function(hintObj) {
-									if (!displayHint) {return;}
-
-									if (objParser) {
-										displayHint = displayHint && regex.test(objParser(hintObj));
-									} else {
-										displayHint = displayHint && regex.test(hintObj);
-									}
-								});
 								scope.selectRow(0);
 							} else {
 								element.addClass('noResults');
@@ -302,7 +304,6 @@
 						};
 
 						modelCtrl.$parsers.push(function(value) {
-							hintInputElem.val('');
 							if (value) {
 								var result;
 								if (isSelectionRequired) {
@@ -341,24 +342,27 @@
 
 						var pendingResultsFunctionCall;
 						var getResults = function() {
-							displayHint = inputElem[0].scrollWidth <= inputElem[0].clientWidth;
 							//setParentModel();
 
 							scope.selectedHintIndex = null;
 							scope.hints = [];
-							element.addClass('loading');
 							element.removeClass('noResults');
 							// Stop any pending requests
 
 							$timeout.cancel(pendingResultsFunctionCall);
 
-							if (modelCtrl.$viewValue && minimumChars <= modelCtrl.$viewValue.length) {
-								pendingResultsFunctionCall = $timeout(function() {
-									element.removeClass('loading');
-									getResultsFn( modelCtrl.$viewValue ).then(displaySuggestions);
-								}, silentPeriod, true);
+							if (ignoreNextRestuls) {
+								ignoreNextRestuls = false;
 							} else {
-								element.removeClass('loading');
+								element.addClass('loading');
+								if (modelCtrl.$viewValue && minimumChars <= modelCtrl.$viewValue.length) {
+									pendingResultsFunctionCall = $timeout(function() {
+										element.removeClass('loading');
+										getResultsFn( modelCtrl.$viewValue ).then(displaySuggestions);
+									}, silentPeriod, true);
+								} else {
+									element.removeClass('loading');
+								}
 							}
 						};
 
