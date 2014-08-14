@@ -130,7 +130,6 @@
 				$element.append(inputElem);
 				$element.append(angular.element('<div class="loadingIndicator"></div>'));
 
-				var displayHint = false;
 				return {
 					pre: function(scope, element, attrs) {
 						scope.hints = [];
@@ -235,10 +234,26 @@
 								var scroller = element[0].querySelector('.scroller');
 
 								scope.selectedHintIndex = index;
-								if (displayHint === true) {
+
+								var displayHint = !(inputElem[0].scrollWidth > inputElem[0].clientWidth);
+
+								if (displayHint) {
 									var hintDisplayText = getHintDisplay();
+									var regex = new RegExp('^' + modelCtrl.$viewValue, 'i');
+									var objParser = objParser = $parse(scope.displayPath);
+									if (scope.displayPath !== null) {
+										var objParser = objParser = $parse(scope.displayPath);
+										displayHint = regex.test(objParser(hintDisplayText));
+									} else {
+										displayHint = regex.test(hintDisplayText);
+									}
+								}
+
+								if (displayHint === true) {
 									var userInputString = inputElem.val();
 									hintInputElem.val(userInputString + hintDisplayText.slice(userInputString.length, hintDisplayText.length));
+								} else {
+									hintInputElem.val('');
 								}
 
 								$timeout(function() {
@@ -273,20 +288,6 @@
 							if (!scope.hints) {scope.hints = [];}
 
 							if (scope.hints.length > 0) {
-								var regex = new RegExp('^' + modelCtrl.$viewValue, 'i');
-								var objParser = null;
-								if (scope.displayPath !== null) {
-									objParser = $parse(scope.displayPath);
-								}
-								scope.hints.forEach(function(hintObj) {
-									if (!displayHint) {return;}
-
-									if (objParser) {
-										displayHint = displayHint && regex.test(objParser(hintObj));
-									} else {
-										displayHint = displayHint && regex.test(hintObj);
-									}
-								});
 								scope.selectRow(0);
 							} else {
 								element.addClass('noResults');
@@ -303,7 +304,6 @@
 						};
 
 						modelCtrl.$parsers.push(function(value) {
-							hintInputElem.val('');
 							if (value) {
 								var result;
 								if (isSelectionRequired) {
@@ -342,7 +342,6 @@
 
 						var pendingResultsFunctionCall;
 						var getResults = function() {
-							displayHint = inputElem[0].scrollWidth <= inputElem[0].clientWidth;
 							//setParentModel();
 
 							scope.selectedHintIndex = null;
