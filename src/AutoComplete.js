@@ -355,7 +355,7 @@
 								ignoreNextRestuls = false;
 							} else {
 								element.addClass('loading');
-								if (modelCtrl.$viewValue && minimumChars <= modelCtrl.$viewValue.length) {
+								if (minimumChars === 0 || (angular.isString(modelCtrl.$viewValue) && minimumChars <= modelCtrl.$viewValue.length)) {
 									pendingResultsFunctionCall = $timeout(function() {
 										element.removeClass('loading');
 										getResultsFn( modelCtrl.$viewValue ).then(displaySuggestions);
