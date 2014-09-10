@@ -304,6 +304,7 @@
 						};
 
 						modelCtrl.$parsers.push(function(value) {
+							hintInputElem.val('');
 							if (value) {
 								var result;
 								if (isSelectionRequired) {
