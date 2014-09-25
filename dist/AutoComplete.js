@@ -304,6 +304,7 @@
 						};
 
 						modelCtrl.$parsers.push(function(value) {
+							hintInputElem.val('');
 							if (value) {
 								var result;
 								if (isSelectionRequired) {
@@ -318,9 +319,7 @@
 										}
 									}
 								} else {
-									if (minimumChars <= value.length) {
-										result = value;
-									}
+									result = value;
 								}
 								modelCtrl.$setValidity('hasSelection', result ? true : false);
 							}
@@ -355,7 +354,7 @@
 								ignoreNextRestuls = false;
 							} else {
 								element.addClass('loading');
-								if (modelCtrl.$viewValue && minimumChars <= modelCtrl.$viewValue.length) {
+								if (minimumChars === 0 || (angular.isString(modelCtrl.$viewValue) && minimumChars <= modelCtrl.$viewValue.length)) {
 									pendingResultsFunctionCall = $timeout(function() {
 										element.removeClass('loading');
 										getResultsFn( modelCtrl.$viewValue ).then(displaySuggestions);
