@@ -1,0 +1,23 @@
+{
+	"name": "CSSRuleEditor",
+	"description": "CSS editor",
+	"version": "0.0.1",
+	"homepage": "https://github.com/EnzeyNet/CSSRuleEditor",
+	"bugs": "https://github.com/EnzeyNet/CSSRuleEditor/issues",
+	"author": {
+		"name": "Joseph Aspelund",
+		"email": "enzey@enzey.net",
+		"url": "https://github.com/Xanir"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/EnzeyNet/CSSRuleEditor.git"
+	},
+	"keywords": [
+		"angular"
+	],
+	"dependencies": {
+		"angular": "1.2.x",
+		"angular-mocks": "~1.2.x"
+	}
+}

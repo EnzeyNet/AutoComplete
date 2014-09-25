@@ -1,0 +1,135 @@
+.autoComplete {
+  position: relative;
+  display: inline-block;
+}
+.autoComplete > iframe {
+  position: relative;
+  top: 0px;
+  left: 0px;
+  background: transparent;
+  background-color: transparent;
+}
+.autoComplete iframe {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  background: transparent;
+  background-color: transparent;
+  border: none;
+  margin: 0px;
+}
+.autoComplete input {
+  width: 100%;
+}
+.autoComplete .hintBox {
+  position: relative;
+  color: #B0B0B0;
+}
+.autoComplete .textEntry {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+}
+.autoComplete .textEntry:focus {
+  background: transparent;
+  background-color: transparent;
+}
+.autoComplete .hint {
+  padding: .2em .4em;
+  position: relative;
+  display: block;
+  cursor: pointer;
+}
+.autoComplete .textEntry:focus ~ .scrollerContainer,
+.autoComplete .scrollerContainer:hover {
+  display: block;
+}
+.autoComplete .scrollerContainer {
+  position: absolute;
+  display: none;
+  padding: 0;
+  margin: 0;
+}
+.autoComplete .scroller {
+  display: block;
+  position: relative;
+  border: 1px solid;
+  background: white;
+  z-index: 9000;
+  overflow: hidden;
+  max-height: 8em;
+}
+.autoComplete .selectedHint {
+  background-color: lightblue;
+}
+.autoComplete .noResults {
+  display: none;
+}
+.autoComplete.noResults .noResults {
+  display: block;
+  cursor: default;
+}
+.loading .textEntry {
+  padding-right: 1.5em;
+}
+.loading .loadingIndicator {
+  display: inline-block;
+}
+.loadingIndicator {
+  display: none;
+  position: absolute;
+  top: .1em;
+  right: .1em;
+  width: 1em;
+  height: 1em;
+  color: #ccc;
+  font-family: "Open Sans", sans-serif;
+  font-weight: 300;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+.loadingIndicator:before {
+  display: block;
+  width: 1em;
+  height: 1em;
+  content: "";
+  border-top: 2px solid #333;
+  border-right: 2px solid transparent;
+  border-radius: 100%;
+  -webkit-animation: spin 1s ease infinite;
+  -moz-animation: spin 1s ease infinite;
+  -o-animation: spin 1s ease infinite;
+  animation: spin 1s ease infinite;
+}
+@-webkit-keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+@-moz-keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+@-o-keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
