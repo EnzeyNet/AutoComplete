@@ -138,7 +138,7 @@
 						var hintList = $compile('\
 							<div class="scrollerContainer">\
 								<iframe></iframe>\
-								<div class="scroller" ng-hide="hints.length < 2">\
+								<div class="scroller" ng-hide="hints.length < 1">\
 									<div class="hint"\
 											ng-repeat="hint in hints"\
 											ng-click="select($index)"\
