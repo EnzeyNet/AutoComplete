@@ -13,6 +13,52 @@
 		return false;
 	};
 
+	module.provider('nzAutoCompleteConfig', function () {
+		var positionHintsFn = function(){};
+		var minimumChars = 1;
+		var silentPeriod = 250;
+		var isSelectionRequired = false;
+		var noResultsOnSelect = false;
+
+		this.setPositionHintsFn = function(_positionHintsFn) {
+			if (angular.isFunction(_positionHintsFn)) {
+				positionHintsFn = _positionHintsFn;
+			}
+		};
+		this.setMinimumChars = function(_minimumChars) {
+			minimumChars = +_minimumChars;
+		};
+		this.setSilentPeriod = function(_silentPeriod) {
+			silentPeriod = +_silentPeriod;
+		};
+		this.isSelectionRequired = function(_isSelectionRequired) {
+			isSelectionRequired = !!_isSelectionRequired;
+		};
+		this.isNoResultsOnSelect = function(_noResultsOnSelect) {
+			noResultsOnSelect = !!_noResultsOnSelect;
+		};
+
+		this.$get = function() {
+			return {
+				getPositionHintsFn: function() {
+					return positionHintsFn;
+				},
+				getMinimumChars: function() {
+					return minimumChars;
+				},
+				getSilentPeriod: function() {
+					return silentPeriod;
+				},
+				isSelectionRequired: function() {
+					return isSelectionRequired;
+				},
+				isNoResultsOnSelect: function() {
+					return noResultsOnSelect;
+				},
+			};
+		};
+	});
+
 	var defaultTemplateUrl = 'AutoComplete/hintTemplate.html';
 	module.run(function($templateCache) {
 		var defaultTemplate = '<div nz-auto-complete-hint-text></div>';
@@ -65,7 +111,7 @@
 		hintList.css('display', '');
 	};
 
-	module.directive('nzAutoComplete', function($parse, $timeout, $compile) {
+	module.directive('nzAutoComplete', function($parse, $timeout, $compile, nzAutoCompleteConfig) {
 		return {
 			scope: {},
 			restrict: 'AE',
@@ -187,7 +233,13 @@
 							});
 						}
 						*/
-						var positionHintsFn = function(){};
+
+						var getResultsFn = $parse(attrs.getResultsFn)(scope.$parent);
+						if (!getResultsFn || !typeof getResultsFn === 'function') {
+							throw 'A function that returns results is required!';
+						}
+
+						var positionHintsFn = nzAutoCompleteConfig.getPositionHintsFn();
 						if (isDefined(attrs.positionHintsFn)) {
 							var customPositionFunction = $parse(attrs.positionHintsFn)(scope.$parent);
 							if (angular.isFunction(customPositionFunction)) {
@@ -195,26 +247,25 @@
 							}
 						}
 
-						var getResultsFn = $parse(attrs.getResultsFn)(scope.$parent);
-						if (!getResultsFn || !typeof getResultsFn === 'function') {
-							throw 'A function that returns results is required!';
-						}
-
 						var minimumChars = +$parse(attrs.minChar)(scope.$parent);
-						if (isNaN(minimumChars)) {minimumChars = 1;}
+						if (isNaN(minimumChars)) {
+							minimumChars = nzAutoCompleteConfig.getMinimumChars();
+						}
 						if (minimumChars === 0) {
 							getResultsFn( modelCtrl.$viewValue ).then(displaySuggestions);
 						}
 
 						var silentPeriod = +$parse(attrs.silentPeriod)(scope.$parent);
-						if (isNaN(silentPeriod)) {silentPeriod = 250;}
+						if (isNaN(silentPeriod)) {
+							silentPeriod = nzAutoCompleteConfig.getSilentPeriod();
+						}
 
-						var isSelectionRequired = false;
+						var isSelectionRequired = nzAutoCompleteConfig.isSelectionRequired();
 						if (attrs.selectionRequired === '' || attrs.selectionRequired === 'true') {
 							isSelectionRequired = true;
 						}
 
-						var noResultsOnSelect = false;
+						var noResultsOnSelect = nzAutoCompleteConfig.isNoResultsOnSelect();
 						if (attrs.noResultsOnSelect === '' || attrs.noResultsOnSelect === 'true') {
 							noResultsOnSelect = true;
 						}
