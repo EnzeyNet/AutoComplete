@@ -1,9 +1,9 @@
 {
-	"name": "CSSRuleEditor",
-	"description": "CSS editor",
+	"name": "AutoComplete",
+	"description": "Angular AutoComplete Directive",
 	"version": "0.0.1",
-	"homepage": "https://github.com/EnzeyNet/CSSRuleEditor",
-	"bugs": "https://github.com/EnzeyNet/CSSRuleEditor/issues",
+	"homepage": "https://github.com/EnzeyNet/AutoComplete",
+	"bugs": "https://github.com/EnzeyNet/AutoComplete/issues",
 	"author": {
 		"name": "Joseph Aspelund",
 		"email": "enzey@enzey.net",
@@ -11,7 +11,7 @@
 	},
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/EnzeyNet/CSSRuleEditor.git"
+		"url": "https://github.com/EnzeyNet/AutoComplete.git"
 	},
 	"keywords": [
 		"angular"

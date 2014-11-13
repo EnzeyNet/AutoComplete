@@ -60,12 +60,12 @@
 	});
 
 	var defaultTemplateUrl = 'AutoComplete/hintTemplate.html';
-	module.run(function($templateCache) {
+	module.run(['$templateCache', function($templateCache) {
 		var defaultTemplate = '<div nz-auto-complete-hint-text></div>';
 		$templateCache.put(defaultTemplateUrl, defaultTemplate);
-	});
+	}]);
 
-	module.directive('nzAutoCompleteHintText', function($parse) {
+	module.directive('nzAutoCompleteHintText', ['$parse', function($parse) {
 		return {
 			restrict: 'AE',
 			link: {
@@ -82,9 +82,9 @@
 				}
 			}
 		};
-	});
+	}]);
 
-	module.directive('nzAutoCompleteInclude', function($parse, $compile, $http, $templateCache) {
+	module.directive('nzAutoCompleteInclude', ['$parse', '$compile', '$http', '$templateCache', function($parse, $compile, $http, $templateCache) {
 		return {
 			restrict: 'AE',
 			compile: function() {
@@ -98,7 +98,7 @@
 				}
 			}
 		};
-	});
+	}]);
 
 	var positionAndAddScrollBar = function(hintList, inputElem) {
 		hintList.css('display', 'block');
@@ -111,11 +111,11 @@
 		hintList.css('display', '');
 	};
 
-	module.directive('nzAutoComplete', function($parse, $timeout, $compile, nzAutoCompleteConfig) {
+	module.directive('nzAutoComplete', ['$parse', '$timeout', '$compile', 'nzAutoCompleteConfig', function($parse, $timeout, $compile, nzAutoCompleteConfig) {
 		return {
 			scope: {},
 			restrict: 'AE',
-			controller: function($scope) {
+			controller: ['$scope', function($scope) {
 				$scope.keyPressEvent = function(e) {
 					if ($scope.selectedHintIndex !== null && (e.keyCode === 13 || e.keyCode === 9)) {
 						$scope.select($scope.selectedHintIndex);
@@ -147,7 +147,7 @@
 						e.stopPropagation();
 					}
 				};
-			},
+			}],
 			compile: function ($element, $attrs) {
 				$element.addClass('autoComplete');
 
@@ -184,7 +184,7 @@
 						var hintList = $compile('\
 							<div class="scrollerContainer">\
 								<iframe></iframe>\
-								<div class="scroller" ng-hide="hints.length < 2">\
+								<div class="scroller" ng-hide="hints.length < 1">\
 									<div class="hint"\
 											ng-repeat="hint in hints"\
 											ng-click="select($index)"\
@@ -432,6 +432,6 @@
 				}
 			}
 		};
-	});
+	}]);
 
 })(angular);
