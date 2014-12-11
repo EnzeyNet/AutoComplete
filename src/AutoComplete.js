@@ -261,7 +261,7 @@
 						}
 
 						var isSelectionRequired = nzAutoCompleteConfig.isSelectionRequired();
-						if (attrs.selectionRequired === '' || attrs.selectionRequired === 'true') {
+						if (attrs.selectionRequired === '' || attrs.selectionRequired === 'true' || scope.displayPath) {
 							isSelectionRequired = true;
 						}
 
