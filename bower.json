@@ -17,6 +17,7 @@
 		"angular"
 	],
 	"dependencies": {
+		"nz-services": "0.x.x",
 		"angular": "1.2.x",
 		"angular-mocks": "~1.2.x"
 	}

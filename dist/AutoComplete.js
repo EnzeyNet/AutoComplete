@@ -1,5 +1,8 @@
 (function(angular) {
-	var module = angular.module('net.enzey.autocomplete', ['ngSanitize']);
+	var module = angular.module('net.enzey.autocomplete', [
+		'net.enzey.services',
+		'ngSanitize'
+	]);
 
 	var isDefined = function(value) {
 		if (value !== null & value !== undefined) {
@@ -111,7 +114,7 @@
 		hintList.css('display', '');
 	};
 
-	module.directive('nzAutoComplete', ['$parse', '$timeout', '$compile', 'nzAutoCompleteConfig', function($parse, $timeout, $compile, nzAutoCompleteConfig) {
+	module.directive('nzAutoComplete', ['$parse', '$timeout', '$compile', 'nzAutoCompleteConfig', 'nzService', function($parse, $timeout, $compile, nzAutoCompleteConfig, nzService) {
 		return {
 			scope: {},
 			restrict: 'AE',
@@ -286,7 +289,16 @@
 
 								scope.selectedHintIndex = index;
 
-								var displayHint = !(inputElem[0].scrollWidth > inputElem[0].clientWidth);
+								//var displayHint = !(inputElem[0].scrollWidth > inputElem[0].clientWidth);
+								var inputStyledDiv  = nzService.copyComputedStyles(angular.element('<div></div>')[0], inputElem[0]);
+								inputStyledDiv = angular.element(inputStyledDiv);
+								inputStyledDiv.css('white-space', 'nowrap');
+								inputStyledDiv.text(inputElem.val());
+								inputStyledDiv.css('opacity', 0);
+								inputElem.parent().append(inputStyledDiv);
+
+								var displayHint = inputStyledDiv[0].scrollWidth <= inputStyledDiv[0].clientWidth;
+								inputStyledDiv.remove();
 
 								if (displayHint) {
 									var hintDisplayText = getHintDisplay();
