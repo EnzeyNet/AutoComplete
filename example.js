@@ -14,6 +14,13 @@
 		$scope.select2 = 'No';
 		$scope.select3 = {foo: {bar: 'No'}};
 
+		escapeRegexSpecialChars = function(str) {
+			if (angular.isString(str)) {
+				return str.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
+			}
+			return '';
+		};
+
 		$scope.$on('AutoCompleteSelect', function (event, selection) {console.log(selection);});
 		$scope.clear = function() {
 			$scope.select1 = null;
@@ -27,7 +34,7 @@
 			$scope.select2 = 'No';
 			$scope.select3 = {foo: {bar: 'No'}};
 			$scope.select4 = null;
-			$scope.select5 = 'NO';
+			$scope.select5 = 'nomnomnom674584675745754';
 		};
 		var getWatchCount = function (scope, scopeHash) {
 			// default for scopeHash
@@ -63,7 +70,7 @@
 		};
 		updateWatchCount();
 
-		var arrayOfStuff = ['fruit', 'fun', 'family', 'fudge', 'nonfrugal', 'nonliquid', 'nonunison', 'neckpiece', 'nonnitric', 'nastiness', 'novachord', 'nonsaline', 'nonchurch', 'narcotist', 'nucleolus', 'nonbodily', 'nonmucous', 'nondebtor', 'nursemaid', 'nepheline', 'nonsuccor', 'nebulated', 'norwegian', 'nachising', 'nomnomnom'];
+		var arrayOfStuff = ['fruit', 'fun', 'family', 'fudge', 'nonfrugal', 'nonliquid', 'nonunison', 'neckpiece', 'nonnitric', 'nastiness', 'novachord', 'nonsaline', 'nonchurch', 'narcotist', 'nucleolus', 'nonbodily', 'nonmucous', 'nondebtor', 'nursemaid', 'nepheline', 'nonsuccor', 'nebulated', 'norwegian', 'nachising', 'nomnomnom674584675745754'];
 		var arrayOfObjs = [];
 		arrayOfStuff.forEach(function(text) {
 			arrayOfObjs.push({foo: {bar: text}});
@@ -75,7 +82,7 @@
 				return deferredFn.promise;
 			}
 
-			var regex = new RegExp('^' + inputText, 'i');
+			var regex = new RegExp('^' + escapeRegexSpecialChars(inputText), 'i');
 			var results = [];
 			arrayOfStuff.forEach(function(text) {
 				if (regex.test(text)) {results.push(text);}
@@ -92,7 +99,7 @@
 			}
 
 			$timeout(function() {
-				var regex = new RegExp('^' + inputText, 'i');
+				var regex = new RegExp('^' + escapeRegexSpecialChars(inputText), 'i');
 				var results = [];
 				arrayOfObjs.forEach(function(obj) {
 					if (regex.test(obj.foo.bar)) {results.push(obj);}
@@ -110,7 +117,7 @@
 				return deferredFn.promise;
 			}
 
-			var regex = new RegExp(inputText, 'i');
+			var regex = new RegExp(escapeRegexSpecialChars(inputText), 'i');
 			var results = [];
 			arrayOfObjs.forEach(function(obj) {
 				if (regex.test(obj.foo.bar)) {results.push(obj);}
@@ -127,7 +134,7 @@
 				return deferredFn.promise;
 			}
 
-			var regex = new RegExp(inputText, 'i');
+			var regex = new RegExp(escapeRegexSpecialChars(inputText), 'i');
 			var results = [];
 			arrayOfStuff.forEach(function(text) {
 				if (regex.test(text)) {results.push(text);}

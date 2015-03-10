@@ -1,5 +1,8 @@
 (function(angular) {
-	var module = angular.module('net.enzey.autocomplete', ['ngSanitize']);
+	var module = angular.module('net.enzey.autocomplete', [
+		'net.enzey.services',
+		'ngSanitize'
+	]);
 
 	var isDefined = function(value) {
 		if (value !== null & value !== undefined) {
@@ -13,18 +16,72 @@
 		return false;
 	};
 
-	var defaultTemplateUrl = 'AutoComplete/hintTemplate.html';
-	module.run(function($templateCache) {
-		var defaultTemplate = '<div nz-auto-complete-hint-text></div>';
-		$templateCache.put(defaultTemplateUrl, defaultTemplate);
+	escapeRegexSpecialChars = function(str) {
+		if (angular.isString(str)) {
+			return str.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
+		}
+		return '';
+	};
+
+	module.provider('nzAutoCompleteConfig', function () {
+		var positionHintsFn = function(){};
+		var minimumChars = 1;
+		var silentPeriod = 250;
+		var isSelectionRequired = false;
+		var noResultsOnSelect = false;
+
+		this.setPositionHintsFn = function(_positionHintsFn) {
+			if (angular.isFunction(_positionHintsFn)) {
+				positionHintsFn = _positionHintsFn;
+			}
+		};
+		this.setMinimumChars = function(_minimumChars) {
+			minimumChars = +_minimumChars;
+		};
+		this.setSilentPeriod = function(_silentPeriod) {
+			silentPeriod = +_silentPeriod;
+		};
+		this.isSelectionRequired = function(_isSelectionRequired) {
+			isSelectionRequired = !!_isSelectionRequired;
+		};
+		this.isNoResultsOnSelect = function(_noResultsOnSelect) {
+			noResultsOnSelect = !!_noResultsOnSelect;
+		};
+
+		this.$get = function() {
+			return {
+				getPositionHintsFn: function() {
+					return positionHintsFn;
+				},
+				getMinimumChars: function() {
+					return minimumChars;
+				},
+				getSilentPeriod: function() {
+					return silentPeriod;
+				},
+				isSelectionRequired: function() {
+					return isSelectionRequired;
+				},
+				isNoResultsOnSelect: function() {
+					return noResultsOnSelect;
+				},
+			};
+		};
 	});
 
-	module.directive('nzAutoCompleteHintText', function($parse) {
+	var defaultTemplateUrl = 'AutoComplete/hintTemplate.html';
+	module.run(['$templateCache', function($templateCache) {
+		var defaultTemplate = '<div nz-auto-complete-hint-text></div>';
+		$templateCache.put(defaultTemplateUrl, defaultTemplate);
+	}]);
+
+	module.directive('nzAutoCompleteHintText', ['$parse', function($parse) {
 		return {
 			restrict: 'AE',
 			link: {
 				post: function(scope, element, attrs) {
 					var inputText = scope.ngModelCtrl.$viewValue;
+					inputText = escapeRegexSpecialChars(inputText);
 					var hintText = scope.displayPath === null ? 'hint' : 'hint.' + scope.displayPath;
 					var highlightRegExp =  new RegExp('(' + inputText +  ')', 'gi');
 					var text = $parse(hintText)(scope);
@@ -36,9 +93,9 @@
 				}
 			}
 		};
-	});
+	}]);
 
-	module.directive('nzAutoCompleteInclude', function($parse, $compile, $http, $templateCache) {
+	module.directive('nzAutoCompleteInclude', ['$parse', '$compile', '$http', '$templateCache', function($parse, $compile, $http, $templateCache) {
 		return {
 			restrict: 'AE',
 			compile: function() {
@@ -52,7 +109,7 @@
 				}
 			}
 		};
-	});
+	}]);
 
 	var positionAndAddScrollBar = function(hintList, inputElem) {
 		hintList.css('display', 'block');
@@ -65,11 +122,11 @@
 		hintList.css('display', '');
 	};
 
-	module.directive('nzAutoComplete', function($parse, $timeout, $compile) {
+	module.directive('nzAutoComplete', ['$parse', '$timeout', '$compile', 'nzAutoCompleteConfig', 'nzService', function($parse, $timeout, $compile, nzAutoCompleteConfig, nzService) {
 		return {
 			scope: {},
 			restrict: 'AE',
-			controller: function($scope) {
+			controller: ['$scope', function($scope) {
 				$scope.keyPressEvent = function(e) {
 					if ($scope.selectedHintIndex !== null && (e.keyCode === 13 || e.keyCode === 9)) {
 						$scope.select($scope.selectedHintIndex);
@@ -101,7 +158,7 @@
 						e.stopPropagation();
 					}
 				};
-			},
+			}],
 			compile: function ($element, $attrs) {
 				$element.addClass('autoComplete');
 
@@ -138,7 +195,7 @@
 						var hintList = $compile('\
 							<div class="scrollerContainer">\
 								<iframe></iframe>\
-								<div class="scroller" ng-hide="hints.length < 2">\
+								<div class="scroller" ng-hide="hints.length < 1">\
 									<div class="hint"\
 											ng-repeat="hint in hints"\
 											ng-click="select($index)"\
@@ -187,7 +244,13 @@
 							});
 						}
 						*/
-						var positionHintsFn = function(){};
+
+						var getResultsFn = $parse(attrs.getResultsFn)(scope.$parent);
+						if (!getResultsFn || !typeof getResultsFn === 'function') {
+							throw 'A function that returns results is required!';
+						}
+
+						var positionHintsFn = nzAutoCompleteConfig.getPositionHintsFn();
 						if (isDefined(attrs.positionHintsFn)) {
 							var customPositionFunction = $parse(attrs.positionHintsFn)(scope.$parent);
 							if (angular.isFunction(customPositionFunction)) {
@@ -195,26 +258,25 @@
 							}
 						}
 
-						var getResultsFn = $parse(attrs.getResultsFn)(scope.$parent);
-						if (!getResultsFn || !typeof getResultsFn === 'function') {
-							throw 'A function that returns results is required!';
-						}
-
 						var minimumChars = +$parse(attrs.minChar)(scope.$parent);
-						if (isNaN(minimumChars)) {minimumChars = 1;}
+						if (isNaN(minimumChars)) {
+							minimumChars = nzAutoCompleteConfig.getMinimumChars();
+						}
 						if (minimumChars === 0) {
 							getResultsFn( modelCtrl.$viewValue ).then(displaySuggestions);
 						}
 
 						var silentPeriod = +$parse(attrs.silentPeriod)(scope.$parent);
-						if (isNaN(silentPeriod)) {silentPeriod = 250;}
+						if (isNaN(silentPeriod)) {
+							silentPeriod = nzAutoCompleteConfig.getSilentPeriod();
+						}
 
-						var isSelectionRequired = false;
-						if (attrs.selectionRequired === '' || attrs.selectionRequired === 'true') {
+						var isSelectionRequired = nzAutoCompleteConfig.isSelectionRequired();
+						if (attrs.selectionRequired === '' || attrs.selectionRequired === 'true' || scope.displayPath) {
 							isSelectionRequired = true;
 						}
 
-						var noResultsOnSelect = false;
+						var noResultsOnSelect = nzAutoCompleteConfig.isNoResultsOnSelect();
 						if (attrs.noResultsOnSelect === '' || attrs.noResultsOnSelect === 'true') {
 							noResultsOnSelect = true;
 						}
@@ -235,11 +297,20 @@
 
 								scope.selectedHintIndex = index;
 
-								var displayHint = !(inputElem[0].scrollWidth > inputElem[0].clientWidth);
+								//var displayHint = !(inputElem[0].scrollWidth > inputElem[0].clientWidth);
+								var inputStyledDiv  = nzService.copyComputedStyles(angular.element('<div></div>')[0], inputElem[0]);
+								inputStyledDiv = angular.element(inputStyledDiv);
+								inputStyledDiv.css('white-space', 'nowrap');
+								inputStyledDiv.text(inputElem.val());
+								inputStyledDiv.css('opacity', 0);
+								inputElem.parent().append(inputStyledDiv);
+
+								var displayHint = inputStyledDiv[0].scrollWidth <= inputStyledDiv[0].clientWidth;
+								inputStyledDiv.remove();
 
 								if (displayHint) {
 									var hintDisplayText = getHintDisplay();
-									var regex = new RegExp('^' + modelCtrl.$viewValue, 'i');
+									var regex = new RegExp('^' + escapeRegexSpecialChars(modelCtrl.$viewValue), 'i');
 									var objParser = objParser = $parse(scope.displayPath);
 									if (scope.displayPath !== null) {
 										var objParser = objParser = $parse(scope.displayPath);
@@ -314,6 +385,7 @@
 										if (isDefined(scope.displayPath)) {
 											selectedStringValue = $parse(scope.displayPath)(selectedStringValue)
 										}
+										selectedStringValue = escapeRegexSpecialChars(selectedStringValue);
 										if (new RegExp(selectedStringValue, 'gi').test(value)) {
 											result = selectedObj;
 										}
@@ -381,6 +453,6 @@
 				}
 			}
 		};
-	});
+	}]);
 
 })(angular);
