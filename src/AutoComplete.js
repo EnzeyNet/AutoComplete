@@ -16,6 +16,13 @@
 		return false;
 	};
 
+	escapeRegexSpecialChars = function(str) {
+		if (angular.isString(str)) {
+			return str.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
+		}
+		return '';
+	};
+
 	module.provider('nzAutoCompleteConfig', function () {
 		var positionHintsFn = function(){};
 		var minimumChars = 1;
@@ -74,6 +81,7 @@
 			link: {
 				post: function(scope, element, attrs) {
 					var inputText = scope.ngModelCtrl.$viewValue;
+					inputText = escapeRegexSpecialChars(inputText);
 					var hintText = scope.displayPath === null ? 'hint' : 'hint.' + scope.displayPath;
 					var highlightRegExp =  new RegExp('(' + inputText +  ')', 'gi');
 					var text = $parse(hintText)(scope);
@@ -302,7 +310,7 @@
 
 								if (displayHint) {
 									var hintDisplayText = getHintDisplay();
-									var regex = new RegExp('^' + modelCtrl.$viewValue, 'i');
+									var regex = new RegExp('^' + escapeRegexSpecialChars(modelCtrl.$viewValue), 'i');
 									var objParser = objParser = $parse(scope.displayPath);
 									if (scope.displayPath !== null) {
 										var objParser = objParser = $parse(scope.displayPath);
@@ -377,6 +385,7 @@
 										if (isDefined(scope.displayPath)) {
 											selectedStringValue = $parse(scope.displayPath)(selectedStringValue)
 										}
+										selectedStringValue = escapeRegexSpecialChars(selectedStringValue);
 										if (new RegExp(selectedStringValue, 'gi').test(value)) {
 											result = selectedObj;
 										}
