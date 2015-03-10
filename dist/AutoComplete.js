@@ -301,7 +301,7 @@
 								var inputStyledDiv  = nzService.copyComputedStyles(angular.element('<div></div>')[0], inputElem[0]);
 								inputStyledDiv = angular.element(inputStyledDiv);
 								inputStyledDiv.css('white-space', 'nowrap');
-								inputStyledDiv.text(inputElem.val());
+								inputStyledDiv.text(modelCtrl.$viewValue);
 								inputStyledDiv.css('opacity', 0);
 								inputElem.parent().append(inputStyledDiv);
 
@@ -321,7 +321,7 @@
 								}
 
 								if (displayHint === true) {
-									var userInputString = inputElem.val();
+									var userInputString = modelCtrl.$viewValue;
 									hintInputElem.val(userInputString + hintDisplayText.slice(userInputString.length, hintDisplayText.length));
 								} else {
 									hintInputElem.val('');
@@ -374,6 +374,15 @@
 
 						};
 
+						inputElem[0].addEventListener('input', function() {
+							$timeout(function() {
+								if (inputElem[0].value !== modelCtrl.$viewValue) {
+									hintInputElem[0].style.color = 'rgba(0, 0, 0, 0)'
+								} else {
+									hintInputElem[0].style.color = '';
+								}
+							}, 0, false);
+						});
 						modelCtrl.$parsers.push(function(value) {
 							hintInputElem.val('');
 							if (value) {
