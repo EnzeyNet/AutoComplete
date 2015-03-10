@@ -25,6 +25,11 @@
   position: relative;
   color: #B0B0B0;
 }
+.autoComplete input::-ms-clear {
+  display: none;
+  width: 0;
+  height: 0;
+}
 .autoComplete .textEntry {
   position: absolute;
   top: 0px;
