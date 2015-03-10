@@ -263,7 +263,7 @@
 							minimumChars = nzAutoCompleteConfig.getMinimumChars();
 						}
 						if (minimumChars === 0) {
-							getResultsFn( modelCtrl.$viewValue ).then(displaySuggestions);
+							getResultsFn( angular.isString(modelCtrl.$viewValue) ? modelCtrl.$viewValue : '' ).then(displaySuggestions);
 						}
 
 						var silentPeriod = +$parse(attrs.silentPeriod)(scope.$parent);
@@ -301,7 +301,7 @@
 								var inputStyledDiv  = nzService.copyComputedStyles(angular.element('<div></div>')[0], inputElem[0]);
 								inputStyledDiv = angular.element(inputStyledDiv);
 								inputStyledDiv.css('white-space', 'nowrap');
-								inputStyledDiv.text(modelCtrl.$viewValue);
+								inputStyledDiv.text(angular.isString(modelCtrl.$viewValue) ? modelCtrl.$viewValue : '');
 								inputStyledDiv.css('opacity', 0);
 								inputElem.parent().append(inputStyledDiv);
 
@@ -321,7 +321,7 @@
 								}
 
 								if (displayHint === true) {
-									var userInputString = modelCtrl.$viewValue;
+									var userInputString = angular.isString(modelCtrl.$viewValue) ? modelCtrl.$viewValue : '';
 									hintInputElem.val(userInputString + hintDisplayText.slice(userInputString.length, hintDisplayText.length));
 								} else {
 									hintInputElem.val('');
@@ -438,7 +438,7 @@
 								if (minimumChars === 0 || (angular.isString(modelCtrl.$viewValue) && minimumChars <= modelCtrl.$viewValue.length)) {
 									pendingResultsFunctionCall = $timeout(function() {
 										element.removeClass('loading');
-										getResultsFn( modelCtrl.$viewValue ).then(displaySuggestions);
+										getResultsFn( angular.isString(modelCtrl.$viewValue) ? modelCtrl.$viewValue : '' ).then(displaySuggestions);
 									}, silentPeriod, true);
 								} else {
 									element.removeClass('loading');
