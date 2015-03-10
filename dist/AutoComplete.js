@@ -311,9 +311,9 @@
 								if (displayHint) {
 									var hintDisplayText = getHintDisplay();
 									var regex = new RegExp('^' + escapeRegexSpecialChars(modelCtrl.$viewValue), 'i');
-									var objParser = objParser = $parse(scope.displayPath);
+									var objParser = $parse(scope.displayPath);
 									if (scope.displayPath !== null) {
-										var objParser = objParser = $parse(scope.displayPath);
+										var objParser = $parse(scope.displayPath);
 										displayHint = regex.test(objParser(hintDisplayText));
 									} else {
 										displayHint = regex.test(hintDisplayText);
