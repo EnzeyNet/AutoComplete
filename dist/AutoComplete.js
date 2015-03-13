@@ -195,7 +195,7 @@
 						var hintList = $compile('\
 							<div class="scrollerContainer">\
 								<iframe></iframe>\
-								<div class="scroller" ng-hide="hints.length < 1">\
+								<div class="scroller" ng-hide="hints.length < 1" ng-if="!hideResults">\
 									<div class="hint"\
 											ng-repeat="hint in hints"\
 											ng-click="select($index)"\
@@ -280,7 +280,7 @@
 						if (attrs.noResultsOnSelect === '' || attrs.noResultsOnSelect === 'true') {
 							noResultsOnSelect = true;
 						}
-						var ignoreNextRestuls = false;
+						scope.hideResults = false;
 
 						var getHintDisplay = function() {
 							var hintDisplayObj = scope.hints[scope.selectedHintIndex];
@@ -350,7 +350,9 @@
 							inputElem[0].focus();
 							scope.$emit('AutoCompleteSelect', selectedObj);
 							if (noResultsOnSelect) {
-								ignoreNextRestuls = true;
+								scope.$evalAsync(function() {
+									scope.hideResults = true;
+								});
 							}
 						};
 
@@ -385,6 +387,7 @@
 						});
 						modelCtrl.$parsers.push(function(value) {
 							hintInputElem.val('');
+							scope.hideResults = false;
 							if (value) {
 								var result;
 								if (isSelectionRequired) {
@@ -405,6 +408,7 @@
 								modelCtrl.$setValidity('hasSelection', result ? true : false);
 							}
 							getResults();
+
 							return result;
 						});
 						modelCtrl.$formatters.push(function(value) {
@@ -423,7 +427,6 @@
 						var pendingResultsFunctionCall;
 						var getResults = function() {
 							//setParentModel();
-
 							scope.selectedHintIndex = null;
 							scope.hints = [];
 							element.removeClass('noResults');
@@ -431,9 +434,7 @@
 
 							$timeout.cancel(pendingResultsFunctionCall);
 
-							if (ignoreNextRestuls) {
-								ignoreNextRestuls = false;
-							} else {
+							if (!scope.hideResults) {
 								element.addClass('loading');
 								if (minimumChars === 0 || (angular.isString(modelCtrl.$viewValue) && minimumChars <= modelCtrl.$viewValue.length)) {
 									pendingResultsFunctionCall = $timeout(function() {
