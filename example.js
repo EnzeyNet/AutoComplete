@@ -70,7 +70,7 @@
 		};
 		updateWatchCount();
 
-		var arrayOfStuff = ['fruit', 'fun', 'family', 'fudge', 'nonfrugal', 'nonliquid', 'nonunison', 'neckpiece', 'nonnitric', 'nastiness', 'novachord', 'nonsaline', 'nonchurch', 'narcotist', 'nucleolus', 'nonbodily', 'nonmucous', 'nondebtor', 'nursemaid', 'nepheline', 'nonsuccor', 'nebulated', 'norwegian', 'nachising', 'nomnomnom674584675745754'];
+		var arrayOfStuff = ['fruit', 'fun', 'funtastic', 'family', 'fudge', 'nonfrugal', 'nonliquid', 'nonunison', 'neckpiece', 'nonnitric', 'nastiness', 'novachord', 'nonsaline', 'nonchurch', 'narcotist', 'nucleolus', 'nonbodily', 'nonmucous', 'nondebtor', 'nursemaid', 'nepheline', 'nonsuccor', 'nebulated', 'norwegian', 'nachising', 'nomnomnom674584675745754'];
 		var arrayOfObjs = [];
 		arrayOfStuff.forEach(function(text) {
 			arrayOfObjs.push({foo: {bar: text}});
