@@ -1,5 +1,5 @@
 {
-	"name": "AutoComplete",
+	"name": "nz-auto-complete",
 	"description": "Angular AutoComplete Directive",
 	"version": "0.0.1",
 	"homepage": "https://github.com/EnzeyNet/AutoComplete",
@@ -17,7 +17,7 @@
 		"angular"
 	],
 	"dependencies": {
-		"nz-services": "0.x.x",
+		"nz-services": "0.1.4",
 		"angular": "1.2.x",
 		"angular-mocks": "~1.2.x"
 	}
