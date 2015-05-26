@@ -331,12 +331,14 @@
 								$timeout(function() {
 									hintList.css('display', 'block');
 									var selectedHint = scroller.querySelector('.selectedHint');
-									if (selectedHint.offsetTop < scroller.scrollTop) {
-										// scrollUp
-										scroller.scrollTop = selectedHint.offsetTop;
-									} else if (selectedHint.offsetTop + selectedHint.clientHeight > scroller.scrollTop + scroller.clientHeight) {
-										// scrollDown
-										scroller.scrollTop = selectedHint.offsetTop + selectedHint.clientHeight - scroller.clientHeight;
+									if (selectedHint) {
+										if (selectedHint.offsetTop < scroller.scrollTop) {
+											// scrollUp
+											scroller.scrollTop = selectedHint.offsetTop;
+										} else if (selectedHint.offsetTop + selectedHint.clientHeight > scroller.scrollTop + scroller.clientHeight) {
+											// scrollDown
+											scroller.scrollTop = selectedHint.offsetTop + selectedHint.clientHeight - scroller.clientHeight;
+										}
 									}
 									hintList.css('display', '');
 								}, 50, false);
