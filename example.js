@@ -10,7 +10,23 @@
 		$templateCache.put('object.html', '<div nz-auto-complete-hint-text></div>');
 	});
 
-	module.controller('autoCompeteExample', function($scope, $timeout, $rootScope, $q) {
+	module.controller('simpleController', function($scope, $document) {
+		this.getOrigin = function() {
+			return $document[0].origin;
+		};
+	});
+
+	module.controller('complexController', function($scope, $controller) {
+		angular.extend(this, $controller('simpleController', {$scope: $scope}));
+	});
+
+	var getExtendableController = function($controller, $injector) {
+		$controller('complexController', {$scope: $scope})
+	}
+
+	module.controller('autoCompeteExample', function($scope, $timeout, $rootScope, $q, $controller, $injector) {
+
+		angular.extend(this, $controller('complexController', {$scope: $scope}));
 		$scope.select2 = 'No';
 		$scope.select3 = {foo: {bar: 'No'}};
 
@@ -91,6 +107,16 @@
 			deferredFn.resolve(results);
 			return deferredFn.promise;
 		};
+		$scope.delayedResults = function(inputText) {
+			var deferred = $q.defer();
+
+			$timeout(function() {
+				$scope.searchFunction(inputText).then(function(results) {
+					deferred.resolve(results);
+				});
+			}, 2000);
+			return deferred.promise;
+		}
 		$scope.searchFunctionObjs = function (inputText) {
 			var deferredFn = $q.defer();
 			if (!inputText || inputText.length < 1) {

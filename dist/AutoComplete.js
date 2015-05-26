@@ -245,6 +245,10 @@
 						}
 						*/
 
+						var removeLoadingIndicator = function() {
+							element.removeClass('loading');
+						};
+
 						var getResultsFn = $parse(attrs.getResultsFn)(scope.$parent);
 						if (!getResultsFn || !typeof getResultsFn === 'function') {
 							throw 'A function that returns results is required!';
@@ -261,9 +265,6 @@
 						var minimumChars = +$parse(attrs.minChar)(scope.$parent);
 						if (isNaN(minimumChars)) {
 							minimumChars = nzAutoCompleteConfig.getMinimumChars();
-						}
-						if (minimumChars === 0) {
-							getResultsFn( angular.isString(modelCtrl.$viewValue) ? modelCtrl.$viewValue : '' ).then(displaySuggestions);
 						}
 
 						var silentPeriod = +$parse(attrs.silentPeriod)(scope.$parent);
@@ -330,12 +331,14 @@
 								$timeout(function() {
 									hintList.css('display', 'block');
 									var selectedHint = scroller.querySelector('.selectedHint');
-									if (selectedHint.offsetTop < scroller.scrollTop) {
-										// scrollUp
-										scroller.scrollTop = selectedHint.offsetTop;
-									} else if (selectedHint.offsetTop + selectedHint.clientHeight > scroller.scrollTop + scroller.clientHeight) {
-										// scrollDown
-										scroller.scrollTop = selectedHint.offsetTop + selectedHint.clientHeight - scroller.clientHeight;
+									if (selectedHint) {
+										if (selectedHint.offsetTop < scroller.scrollTop) {
+											// scrollUp
+											scroller.scrollTop = selectedHint.offsetTop;
+										} else if (selectedHint.offsetTop + selectedHint.clientHeight > scroller.scrollTop + scroller.clientHeight) {
+											// scrollDown
+											scroller.scrollTop = selectedHint.offsetTop + selectedHint.clientHeight - scroller.clientHeight;
+										}
 									}
 									hintList.css('display', '');
 								}, 50, false);
@@ -375,6 +378,17 @@
 							}
 
 						};
+
+						var getAndDisplayResults = function() {
+							var results = getResultsFn( angular.isString(modelCtrl.$viewValue) ? modelCtrl.$viewValue : '' );
+
+							results.then(removeLoadingIndicator, removeLoadingIndicator);
+							return results.then(displaySuggestions);
+						};
+
+						if (minimumChars === 0) {
+							getAndDisplayResults();
+						}
 
 						inputElem[0].addEventListener('input', function() {
 							$timeout(function() {
@@ -438,11 +452,10 @@
 								element.addClass('loading');
 								if (minimumChars === 0 || (angular.isString(modelCtrl.$viewValue) && minimumChars <= modelCtrl.$viewValue.length)) {
 									pendingResultsFunctionCall = $timeout(function() {
-										element.removeClass('loading');
-										getResultsFn( angular.isString(modelCtrl.$viewValue) ? modelCtrl.$viewValue : '' ).then(displaySuggestions);
+										getAndDisplayResults();
 									}, silentPeriod, true);
 								} else {
-									element.removeClass('loading');
+									removeLoadingIndicator();
 								}
 							}
 						};
