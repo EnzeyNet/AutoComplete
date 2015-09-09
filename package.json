@@ -13,6 +13,7 @@
 		"type": "git",
 		"url": "https://github.com/EnzeyNet/AutoComplete.git"
 	},
+	"main": "./dist/AutoComplete.js",
 	"keywords": [
 		"angular"
 	],
