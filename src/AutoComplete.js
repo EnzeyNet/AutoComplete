@@ -402,8 +402,8 @@
 						modelCtrl.$parsers.push(function(value) {
 							hintInputElem.val('');
 							scope.hideResults = false;
+							var result = '';
 							if (value) {
-								var result;
 								if (isSelectionRequired) {
 									var selectedObj = scope.hints[scope.selectedHintIndex];
 									if (scope.hints && scope.hints.length > 0) {
