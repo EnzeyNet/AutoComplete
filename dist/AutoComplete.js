@@ -70,12 +70,12 @@
 	});
 
 	var defaultTemplateUrl = 'AutoComplete/hintTemplate.html';
-	module.run(['$templateCache', function($templateCache) {
+	module.run(function($templateCache) {
 		var defaultTemplate = '<div nz-auto-complete-hint-text></div>';
 		$templateCache.put(defaultTemplateUrl, defaultTemplate);
-	}]);
+	});
 
-	module.directive('nzAutoCompleteHintText', ['$parse', function($parse) {
+	module.directive('nzAutoCompleteHintText', function($parse) {
 		return {
 			restrict: 'AE',
 			link: {
@@ -93,9 +93,9 @@
 				}
 			}
 		};
-	}]);
+	});
 
-	module.directive('nzAutoCompleteInclude', ['$parse', '$compile', '$http', '$templateCache', function($parse, $compile, $http, $templateCache) {
+	module.directive('nzAutoCompleteInclude', function($parse, $compile, $http, $templateCache) {
 		return {
 			restrict: 'AE',
 			compile: function() {
@@ -109,7 +109,7 @@
 				}
 			}
 		};
-	}]);
+	});
 
 	var positionAndAddScrollBar = function(hintList, inputElem) {
 		hintList.css('display', 'block');
@@ -122,11 +122,11 @@
 		hintList.css('display', '');
 	};
 
-	module.directive('nzAutoComplete', ['$parse', '$timeout', '$compile', 'nzAutoCompleteConfig', 'nzService', function($parse, $timeout, $compile, nzAutoCompleteConfig, nzService) {
+	module.directive('nzAutoComplete', function($parse, $timeout, $compile, nzAutoCompleteConfig, nzService) {
 		return {
 			scope: {},
 			restrict: 'AE',
-			controller: ['$scope', function($scope) {
+			controller: function($scope) {
 				$scope.keyPressEvent = function(e) {
 					if ($scope.selectedHintIndex !== null && (e.keyCode === 13 || e.keyCode === 9)) {
 						$scope.select($scope.selectedHintIndex);
@@ -158,7 +158,7 @@
 						e.stopPropagation();
 					}
 				};
-			}],
+			},
 			compile: function ($element, $attrs) {
 				$element.addClass('autoComplete');
 
@@ -402,8 +402,8 @@
 						modelCtrl.$parsers.push(function(value) {
 							hintInputElem.val('');
 							scope.hideResults = false;
+							var result = '';
 							if (value) {
-								var result;
 								if (isSelectionRequired) {
 									var selectedObj = scope.hints[scope.selectedHintIndex];
 									if (scope.hints && scope.hints.length > 0) {
@@ -476,6 +476,6 @@
 				}
 			}
 		};
-	}]);
+	});
 
 })(angular);
