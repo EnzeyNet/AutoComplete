@@ -33,7 +33,7 @@
 		"grunt-git": "0.2.x",
 		"grunt-curl": "2.0.x",
 		"grunt-zip": "0.16.x",
-		"grunt-ng-annotate": "0.6.x",
+		"grunt-ng-annotate": "1.0.x",
 		"grunt-contrib-less": "0.11.x",
 		"grunt-contrib-jshint": "0.6.x",
 		"grunt-contrib-concat": "0.3.x",
